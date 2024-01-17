@@ -1,0 +1,50 @@
+version: '3.9'
+services:
+ crdb1:
+   image: cockroachdb/cockroach:latest
+   container_name: crdb1
+   hostname: crdb1
+   ports:
+     - "26257:26257"
+     - "8080:8080"
+   command: start --insecure --store=node1 --listen-addr=crdb1:26257 --http-addr=crdb1:8080 --join=crdb1:26257,crdb2:26258,crdb3:26259
+   volumes:
+     - "${PWD}/cockroach-data/crdb1:/cockroach/cockroach-data"
+     - "${PWD}/scripts:/scripts"
+
+ crdb2:
+   image: cockroachdb/cockroach:latest
+   container_name: crdb2
+   hostname: crdb2
+   ports:
+     - "26258:26258"
+     - "8081:8081"
+   command: start --insecure --store=node2 --listen-addr=crdb2:26258 --http-addr=crdb2:8081 --join=crdb1:26257,crdb2:26258,crdb3:26259
+   volumes:
+     - "${PWD}/cockroach-data/crdb2:/cockroach/cockroach-data"
+     - "${PWD}/scripts:/scripts"
+
+ crdb3:
+   image: cockroachdb/cockroach:latest
+   container_name: crdb3
+   hostname: crdb3
+   ports:
+     - "26259:26259"
+     - "8082:8082"
+   command: start --insecure --store=node3 --listen-addr=crdb3:26259 --http-addr=crdb3:8082 --join=crdb1:26257,crdb2:26258,crdb3:26259
+   volumes:
+     - "${PWD}/cockroach-data/crdb3:/cockroach/cockroach-data"
+     - "${PWD}/scripts:/scripts"
+
+ haproxy:
+   image: haproxy:alpine
+   container_name: haproxy
+   depends_on:
+     - crdb1
+   ports:
+     - 80:80
+     - 2001:2001
+     - 26256:26256
+   volumes:
+     - "${PWD}/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg"
+

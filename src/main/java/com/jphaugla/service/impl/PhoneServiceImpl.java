@@ -1,7 +1,7 @@
 package com.jphaugla.service.impl;
 
 import com.jphaugla.domain.Phone;
-import com.jphaugla.exception.ResourceNotFoundException;
+import com.jphaugla.exception.NotFoundException;
 import com.jphaugla.repository.PhoneRepository;
 import com.jphaugla.service.PhoneService;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+
+import static com.jphaugla.util.Constants.ERR_EMAIL_NOT_FOUND;
+import static com.jphaugla.util.Constants.ERR_PHONE_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -36,7 +39,7 @@ public class PhoneServiceImpl implements PhoneService {
     }
 
     @Override
-    public Phone getPhoneById(String phone) {
+    public Phone getPhoneById(String phone) throws NotFoundException {
 //		Optional<Phone> phone = phoneRepository.findById(id);
 //		if(phone.isPresent()) {
 //			return phone.get();
@@ -44,27 +47,26 @@ public class PhoneServiceImpl implements PhoneService {
 //			throw new ResourceNotFoundException("Phone", "Id", id);
 //		}
         return phoneRepository.findById(phone).orElseThrow(() ->
-                new ResourceNotFoundException("Phone", "Id", phone));
+                new NotFoundException(String.format(ERR_PHONE_NOT_FOUND, phone)));
 
     }
 
 
     @Override
-    public void deletePhone(String id) {
+    public void deletePhone(String phone) throws NotFoundException {
 
         // check whether a phone exist in a DB or not
-        phoneRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("Phone", "Id", id));
-        phoneRepository.deleteById(id);
+        phoneRepository.findById(phone).orElseThrow(() ->
+                new NotFoundException(String.format(ERR_PHONE_NOT_FOUND, phone)));
+        phoneRepository.deleteById(phone);
     }
 
     @Override
     public List<Phone> getAllCustomerPhones(UUID customerId) {
-        List <Phone> customerPhones = phoneRepository.findByCustomerId(customerId);
-        return customerPhones;
+        return phoneRepository.findByCustomerId(customerId);
     }
     @Override
-    public void deleteCustomerPhones(UUID customerId) {
+    public void deleteCustomerPhones(UUID customerId) throws NotFoundException {
         List <Phone> customerPhones = getAllCustomerPhones(customerId);
         for (Phone phone : customerPhones) {
             deletePhone(phone.getNumber());

@@ -36,4 +36,5 @@ public class Transaction extends BaseEntity{
     private String location;
     private String transactionTags;
 
+
 }

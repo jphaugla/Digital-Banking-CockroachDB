@@ -3,7 +3,7 @@ package com.jphaugla.service.impl;
 import com.jphaugla.domain.Dispute;
 import com.jphaugla.domain.Transaction;
 
-import com.jphaugla.exception.ResourceNotFoundException;
+import com.jphaugla.exception.NotFoundException;
 import com.jphaugla.repository.DisputeRepository;
 import com.jphaugla.repository.TransactionRepository;
 
@@ -14,11 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.text.ParseException;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
+
+import static com.jphaugla.util.Constants.ERR_DISPUTE_NOT_FOUND;
+import static com.jphaugla.util.Constants.ERR_TRANSACTION_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -47,7 +48,7 @@ public class DisputeServiceImpl implements DisputeService {
     }
 
     @Override
-    public Dispute getDisputeById(UUID id) {
+    public Dispute getDisputeById(UUID id) throws NotFoundException {
 //		Optional<dispute> dispute = disputeRepository.findById(id);
 //		if(dispute.isPresent()) {
 //			return dispute.get();
@@ -55,16 +56,16 @@ public class DisputeServiceImpl implements DisputeService {
 //			throw new ResourceNotFoundException("dispute", "Id", id);
 //		}
         return disputeRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("dispute", "Id", id));
+                new NotFoundException (String.format(ERR_DISPUTE_NOT_FOUND, id)));
 
     }
 
     @Override
-    public Dispute updatedispute(Dispute dispute, UUID id) {
+    public Dispute updatedispute(Dispute dispute, UUID id) throws NotFoundException {
 
         // we need to check whether dispute with given id is exist in DB or not
         Dispute existingDispute = disputeRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("dispute", "Id", id));
+                () -> new NotFoundException (String.format(ERR_DISPUTE_NOT_FOUND, id)));
 
         //existingdispute.setEmail(dispute.getEmail());
         // save existing dispute to DB
@@ -73,15 +74,15 @@ public class DisputeServiceImpl implements DisputeService {
     }
 
     @Override
-    public void deleteDispute(UUID id) {
+    public void deleteDispute(UUID id) throws NotFoundException {
 
         // check whether a dispute exist in a DB or not
         disputeRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("dispute", "Id", id));
+                new NotFoundException (String.format(ERR_DISPUTE_NOT_FOUND, id)));
         disputeRepository.deleteById(id);
     }
 
-    public String postDispute(Dispute dispute) {
+    public String postDispute(Dispute dispute) throws NotFoundException {
         log.info("in bs.postDispute with Dispute =" + dispute);
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
 
@@ -90,7 +91,7 @@ public class DisputeServiceImpl implements DisputeService {
         // dispute.setFilingDate(filingDateTime);
         dispute.setLastUpdateDate(currentTimestamp);
         Transaction transaction = transactionRepository.findById(dispute.getTranId()).orElseThrow(() ->
-                new ResourceNotFoundException("Dispute", "tranId", dispute.getTranId().toString()));;
+                new NotFoundException (String.format(ERR_TRANSACTION_NOT_FOUND, dispute.getTranId())));
         dispute.setChargeBackAmount(transaction.getAmount());
         log.info("before create with Dispute =" + dispute);
         disputeRepository.save(dispute);
@@ -99,9 +100,9 @@ public class DisputeServiceImpl implements DisputeService {
         return dispute.getId().toString();
     }
 
-    public Dispute putDisputeChargeBackReason(UUID disputeId, String reasonCode) {
+    public Dispute putDisputeChargeBackReason(UUID disputeId, String reasonCode) throws NotFoundException {
         Dispute dispute = disputeRepository.findById(disputeId).orElseThrow(() ->
-                new ResourceNotFoundException("dispute", "Id", disputeId.toString()));
+                new NotFoundException (String.format(ERR_DISPUTE_NOT_FOUND, disputeId)));
         dispute.setChargeBackReason(reasonCode);
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
         dispute.setLastUpdateDate(currentTimestamp);
@@ -110,9 +111,9 @@ public class DisputeServiceImpl implements DisputeService {
         disputeRepository.save(dispute);
         return dispute;
     }
-    public Dispute acceptDisputeChargeBackReason(UUID disputeId) {
+    public Dispute acceptDisputeChargeBackReason(UUID disputeId) throws NotFoundException {
         Dispute dispute = disputeRepository.findById(disputeId).orElseThrow(() ->
-                new ResourceNotFoundException("dispute", "Id", disputeId.toString()));
+                new NotFoundException (String.format(ERR_DISPUTE_NOT_FOUND, disputeId)));
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
         dispute.setLastUpdateDate(currentTimestamp);
         dispute.setAcceptanceChargeBackDate(currentTimestamp);
@@ -121,9 +122,9 @@ public class DisputeServiceImpl implements DisputeService {
         return dispute;
     }
 
-    public Dispute resolvedDispute(UUID disputeId) {
+    public Dispute resolvedDispute(UUID disputeId) throws NotFoundException {
         Dispute dispute = disputeRepository.findById(disputeId).orElseThrow(() ->
-                new ResourceNotFoundException("dispute", "Id", disputeId.toString()));
+                new NotFoundException (String.format(ERR_DISPUTE_NOT_FOUND, disputeId)));
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
         dispute.setLastUpdateDate(currentTimestamp);
         dispute.setResolutionDate(currentTimestamp);

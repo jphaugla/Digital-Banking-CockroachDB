@@ -1,7 +1,7 @@
 package com.jphaugla.service.impl;
 
 import com.jphaugla.domain.TransactionReturn;
-import com.jphaugla.exception.ResourceNotFoundException;
+import com.jphaugla.exception.NotFoundException;
 import com.jphaugla.repository.TransactionReturnRepository;
 import com.jphaugla.service.TransactionReturnService;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
+
+import static com.jphaugla.util.Constants.ERR_TRANSACTION_NOT_FOUND;
+import static com.jphaugla.util.Constants.ERR_TRANSACTION_RETURN_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -36,7 +38,7 @@ public class TransactionReturnServiceImpl implements TransactionReturnService {
     }
 
     @Override
-    public TransactionReturn getTransactionReturnById(String transactionReturn) {
+    public TransactionReturn getTransactionReturnById(String transactionReturn) throws NotFoundException {
 //		Optional<TransactionReturn> transactionReturn = transactionReturnRepository.findById(id);
 //		if(transactionReturn.isPresent()) {
 //			return transactionReturn.get();
@@ -44,18 +46,18 @@ public class TransactionReturnServiceImpl implements TransactionReturnService {
 //			throw new ResourceNotFoundException("TransactionReturn", "Id", id);
 //		}
         return transactionReturnRepository.findById(transactionReturn).orElseThrow(() ->
-                new ResourceNotFoundException("TransactionReturn", "Id", transactionReturn));
+                new NotFoundException(String.format(ERR_TRANSACTION_RETURN_NOT_FOUND, transactionReturn)));
 
     }
 
 
     @Override
-    public void deleteTransactionReturn(String id) {
+    public void deleteTransactionReturn(String transactionReturn) throws NotFoundException {
 
         // check whether a transactionReturn exist in a DB or not
-        transactionReturnRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("TransactionReturn", "Id", id));
-        transactionReturnRepository.deleteById(id);
+        transactionReturnRepository.findById(transactionReturn).orElseThrow(() ->
+                new NotFoundException(String.format(ERR_TRANSACTION_RETURN_NOT_FOUND, transactionReturn)));
+        transactionReturnRepository.deleteById(transactionReturn);
     }
 
 

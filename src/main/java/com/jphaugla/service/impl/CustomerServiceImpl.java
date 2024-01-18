@@ -14,7 +14,7 @@ import com.jphaugla.domain.Account;
 import com.jphaugla.domain.Customer;
 import com.jphaugla.domain.Email;
 import com.jphaugla.domain.Phone;
-import com.jphaugla.exception.ResourceNotFoundException;
+import com.jphaugla.exception.NotFoundException;
 import com.jphaugla.repository.AccountRepository;
 import com.jphaugla.repository.CustomerRepository;
 
@@ -24,6 +24,9 @@ import com.jphaugla.service.CustomerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import static com.jphaugla.util.Constants.*;
+
 @Slf4j
 @Service
 public class CustomerServiceImpl implements CustomerService {
@@ -53,7 +56,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Customer getCustomerById(UUID id) {
+    public Customer getCustomerById(UUID id) throws NotFoundException {
 //		Optional<Customer> customer = customerRepository.findById(id);
 //		if(customer.isPresent()) {
 //			return customer.get();
@@ -61,16 +64,16 @@ public class CustomerServiceImpl implements CustomerService {
 //			throw new ResourceNotFoundException("Customer", "Id", id);
 //		}
         return customerRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("Customer", "Id", id));
+                new NotFoundException(String.format(ERR_CUSTOMER_NOT_FOUND, id)));
 
     }
 
     @Override
-    public Customer updateCustomer(Customer customer, UUID id) {
+    public Customer updateCustomer(Customer customer, UUID id) throws NotFoundException {
 
         // we need to check whether customer with given id is exist in DB or not
         Customer existingCustomer = customerRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Customer", "Id", id));
+                () -> new NotFoundException(String.format(ERR_CUSTOMER_NOT_FOUND, id)));
 
         existingCustomer.setFirstName(customer.getFirstName());
         existingCustomer.setLastName(customer.getLastName());
@@ -81,11 +84,11 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void deleteCustomer(UUID id) {
+    public void deleteCustomer(UUID id) throws NotFoundException {
 
         // check whether a customer exist in a DB or not
         customerRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("Customer", "Id", id));
+                new NotFoundException(String.format(ERR_CUSTOMER_NOT_FOUND, id)));
         customerRepository.deleteById(id);
     }
     @Override
@@ -120,13 +123,15 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<Customer> getCustomerByStateCity(String state, String city) {
-        return customerRepository.findByStateAbbreviationAndCity(state, city);
+    public List<Customer> getCustomerByStateCity(String state, String city) throws NotFoundException {
+        return customerRepository.findByStateAbbreviationAndCity(state, city).orElseThrow(() ->
+                new NotFoundException(String.format(ERR_CUSTOMER_NOT_FOUND_2, "State:" + state + " City: " + city)));
     }
 
     @Override
-    public List<Customer> getCustomerByZipLast(String zipcode, String lastname) {
-        return customerRepository.findByZipcodeAndLastName(zipcode, lastname);
+    public List<Customer> getCustomerByZipLast(String zipcode, String lastname) throws NotFoundException {
+        return customerRepository.findByZipcodeAndLastName(zipcode, lastname).orElseThrow(() ->
+                new NotFoundException(String.format(ERR_CUSTOMER_NOT_FOUND_2, "Zip:" + zipcode + " City: " + lastname)));
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.jphaugla.service.impl;
 
 import com.jphaugla.domain.Email;
-import com.jphaugla.exception.ResourceNotFoundException;
+import com.jphaugla.exception.NotFoundException;
 import com.jphaugla.repository.EmailRepository;
 import com.jphaugla.service.EmailService;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+
+import static com.jphaugla.util.Constants.*;
 
 @Slf4j
 @Service
@@ -36,7 +38,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public Email getEmailById(String email) {
+    public Email getEmailById(String email) throws NotFoundException {
 //		Optional<Email> email = emailRepository.findById(id);
 //		if(email.isPresent()) {
 //			return email.get();
@@ -44,27 +46,27 @@ public class EmailServiceImpl implements EmailService {
 //			throw new ResourceNotFoundException("Email", "Id", id);
 //		}
         return emailRepository.findById(email).orElseThrow(() ->
-                new ResourceNotFoundException("Email", "Id", email));
+                new NotFoundException(String.format(ERR_EMAIL_NOT_FOUND, email)));
 
     }
 
 
     @Override
-    public void deleteEmail(String id) {
+    public void deleteEmail(String email) throws NotFoundException {
 
         // check whether a email exist in a DB or not
-        emailRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("Email", "Id", id));
-        emailRepository.deleteById(id);
+        emailRepository.findById(email).orElseThrow(() ->
+                new NotFoundException(String.format(ERR_EMAIL_NOT_FOUND, email)));
+        emailRepository.deleteById(email);
     }
     @Override
-    public List<Email> getAllCustomerEmails(UUID customerId) {
-        List <Email> customerEmails = emailRepository.findByCustomerId(customerId);
-        return customerEmails;
+    public List<Email> getAllCustomerEmails(UUID customerId) throws NotFoundException {
+        return emailRepository.findByCustomerId(customerId).orElseThrow(() ->
+                new NotFoundException(String.format(ERR_CUSTOMER_EMAIL_NOT_FOUND, customerId)));
     }
 
     @Override
-    public void deleteCustomerEmails(UUID customerId) {
+    public void deleteCustomerEmails(UUID customerId) throws NotFoundException {
         List <Email> customerEmails = getAllCustomerEmails(customerId);
         for (Email email : customerEmails) {
             deleteEmail(email.getAddress());

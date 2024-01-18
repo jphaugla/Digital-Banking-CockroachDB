@@ -1,6 +1,7 @@
 package com.jphaugla.controller;
 
 import com.jphaugla.domain.TransactionReturn;
+import com.jphaugla.exception.NotFoundException;
 import com.jphaugla.service.TransactionReturnService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,12 +22,12 @@ public class TransactionReturnController {
 	private TransactionReturnService transactionReturnService;
 
 	@GetMapping("/get")
-	public ResponseEntity<TransactionReturn> getTransactionReturn(@RequestParam String transactionReturn) {
+	public ResponseEntity<TransactionReturn> getTransactionReturn(@RequestParam String transactionReturn) throws NotFoundException {
 		log.debug("IN get transactionReturn, transactionReturn is " + transactionReturn);
 		return ResponseEntity.ok(transactionReturnService.getTransactionReturnById(transactionReturn));	
 	}
 	@DeleteMapping("/delete")
-	public ResponseEntity<String> deleteTransactionReturn(@RequestParam String transactionReturn) {
+	public ResponseEntity<String> deleteTransactionReturn(@RequestParam String transactionReturn) throws NotFoundException {
 		transactionReturnService.deleteTransactionReturn(transactionReturn);
 		return ResponseEntity.ok("Done");
 	}

@@ -1,4 +1,4 @@
-package io.roach.movrapi.exception;
+package com.jphaugla.exception;
 
 /**
  *   Thrown when a passed string is not a valid UUID

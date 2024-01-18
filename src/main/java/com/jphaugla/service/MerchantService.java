@@ -1,6 +1,7 @@
 package com.jphaugla.service;
 
 import com.jphaugla.domain.Merchant;
+import com.jphaugla.exception.NotFoundException;
 
 import java.util.List;
 import java.util.UUID;
@@ -11,6 +12,6 @@ public interface MerchantService {
     void saveAll(List<Merchant> merchantList);
 
     List<Merchant > getAllMerchants();
-    Merchant  getMerchantById(String id);
-    void deleteMerchant(String id);
+    Merchant  getMerchantById(String id) throws NotFoundException;
+    void deleteMerchant(String id) throws NotFoundException;
 }

@@ -2,6 +2,7 @@ package com.jphaugla.controller;
 
 import com.jphaugla.domain.Email;
 import com.jphaugla.domain.Merchant;
+import com.jphaugla.exception.NotFoundException;
 import com.jphaugla.service.MerchantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,14 +24,14 @@ public class MerchantController {
 	private MerchantService merchantService;
 
 	@GetMapping("/getMerchant")
-	public ResponseEntity<Merchant> getMerchant(@RequestParam String merchant) {
+	public ResponseEntity<Merchant> getMerchant(@RequestParam String merchant) throws NotFoundException {
 		log.info("in getMerchant " + merchant);
 		return ResponseEntity.ok(merchantService.getMerchantById(merchant));
 	}
 	@DeleteMapping("/delete")
-	public ResponseEntity<String> deleteMerchant(@RequestParam String merchant) {
+	public ResponseEntity<String> deleteMerchant(@RequestParam String merchant) throws NotFoundException {
 		merchantService.deleteMerchant(merchant);
-		return ResponseEntity.ok("Done");
+		return ResponseEntity.ok(merchant);
 	}
 	@PostMapping(value = "/postMerchant", consumes = "application/json", produces = "application/json")
 	public  ResponseEntity<String> postMerchant(@RequestBody Merchant merchant ) throws ParseException {

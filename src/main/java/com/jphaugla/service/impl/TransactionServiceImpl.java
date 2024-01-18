@@ -7,8 +7,7 @@ import com.jphaugla.domain.Account;
 import com.jphaugla.domain.Merchant;
 import com.jphaugla.domain.Transaction;
 import com.jphaugla.domain.TransactionReturn;
-import com.jphaugla.exception.ResourceNotFoundException;
-import com.jphaugla.repository.CustomerRepository;
+import com.jphaugla.exception.NotFoundException;
 import com.jphaugla.repository.MerchantRepository;
 import com.jphaugla.repository.TransactionRepository;
 import com.jphaugla.repository.TransactionReturnRepository;
@@ -25,6 +24,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+
+import static com.jphaugla.util.Constants.ERR_NO_TRANSACTIONS_FOUND_FOR;
+import static com.jphaugla.util.Constants.ERR_TRANSACTION_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -50,7 +52,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction saveTransaction(Transaction transaction) {
-        log.info("transactionService.saveTransaction");
+        // log.info("transactionService.saveTransaction");
         return transactionRepository.save(transaction);
     }
     private void writeTransactionKafka(Transaction randomTransaction) throws JsonProcessingException {
@@ -65,26 +67,27 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Transaction getTransactionById(UUID transaction) {
+    public Transaction getTransactionById(UUID transaction) throws NotFoundException {
 //		Optional<Transaction> transaction = transactionRepository.findById(id);
 //		if(transaction.isPresent()) {
 //			return transaction.get();
 //		}else {
 //			throw new ResourceNotFoundException("Transaction", "Id", id);
 //		}
+        log.info("in getTransactionById with UUID" + transaction.toString());
         return transactionRepository.findById(transaction).orElseThrow(() ->
-                new ResourceNotFoundException("Transaction", "Id", transaction));
+                new NotFoundException(String.format(ERR_TRANSACTION_NOT_FOUND, transaction)));
 
     }
 
     @Override
-    public void deleteTransaction(UUID id) {
+    public void deleteTransaction(UUID id) throws NotFoundException {
         transactionRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("Transaction", "Id", id));
+                new NotFoundException(String.format(ERR_TRANSACTION_NOT_FOUND, id)));
     }
 
     @Override
-    public UUID saveSampleTransaction(UUID accountId, Boolean doKafka) throws ParseException, JsonProcessingException {
+    public UUID saveSampleTransaction(UUID accountId, Boolean doKafka) throws ParseException {
         Date settle_date = new SimpleDateFormat("yyyy/MM/dd").
                 parse("2021/07/28");
         Timestamp settle_timestamp = new Timestamp((settle_date.getTime()));
@@ -158,13 +161,22 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<Transaction> getMerchantCategoryTransactions(String merchantCategory, String account, Date startDate, Date endDate) {
-        return null;
+    public List<Transaction> getMerchantCategoryTransactions(String merchantCategory, UUID account, Date startDate, Date endDate) throws NotFoundException {
+        return transactionRepository.findByMerchantCategoryAndAccountIdAndPostingDateBetween(merchantCategory,
+                account, startDate, endDate).orElseThrow(() ->new NotFoundException(String.format(ERR_NO_TRANSACTIONS_FOUND_FOR,
+                "merchantCategory: " + merchantCategory + " account:" + account.toString() + " start date:" + startDate.toString()
+                        + " end date:" + endDate.toString())));
     }
 
+
+
     @Override
-    public List<Transaction> getMerchantTransactions(String merchant, String account, Date startDate, Date endDate) {
-        return null;
+    public List<Transaction> getMerchantTransactions(String merchant, UUID account, Date startDate, Date endDate)
+            throws NotFoundException {
+        return transactionRepository.findByMerchantAndAccountIdAndPostingDateBetween(merchant,
+                account, startDate, endDate).orElseThrow(() ->new NotFoundException(String.format(ERR_NO_TRANSACTIONS_FOUND_FOR,
+                "merchant: " + merchant + " account:" + account.toString() + " start date:" + startDate.toString()
+                        + " end date:" + endDate.toString())));
     }
 
     @Override
@@ -188,7 +200,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public String getTransactionTagList(String transactionID) {
+    public String getTransactionTagList(UUID transactionID) {
         return null;
     }
 

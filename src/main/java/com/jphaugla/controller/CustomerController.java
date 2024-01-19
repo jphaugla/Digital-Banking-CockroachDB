@@ -36,7 +36,7 @@ public class CustomerController {
 	private EmailService emailService;
 
 	// customer
-	@GetMapping("/save")
+	@PutMapping("/save")
 	public ResponseEntity<String> saveCustomer() throws ParseException {
 		log.info("in controller save customer");
 		Customer customer = customerService.saveSampleCustomer();

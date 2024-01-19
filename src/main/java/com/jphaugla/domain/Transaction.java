@@ -1,10 +1,13 @@
 package com.jphaugla.domain;
 
+import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -30,11 +33,16 @@ public class Transaction extends BaseEntity{
     private Timestamp settlementDate;
     private Timestamp postingDate;
     //  this is authorized, posted, settled
-    private String status   ;
+    private String status;
     private UUID disputeId;
     private String transactionReturn;
     private String location;
-    private String transactionTags;
+    @Type(ListArrayType.class)
+    @Column(
+            name = "transaction_tags",
+            columnDefinition = "text[]"
+    )
+    private List<String> transactionTags;
 
 
 }

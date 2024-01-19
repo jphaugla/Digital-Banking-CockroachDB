@@ -23,7 +23,8 @@ public class Constants {
     public static final String ERR_CUSTOMER_EMAIL_NOT_FOUND = "No email found for Customer id <%s>";
     public static final String ERR_CUSTOMER_PHONE_NOT_FOUND = "No phone found for Customer id <%s>";
     public static final String ERR_NO_TRANSACTIONS_FOUND_FOR = "No transaction found for <%s>";
-    public static final String ERR_LON_INVALID = "Longitude must be between -180 and 180.";
+    public static final String ERR_INVALID_TRANSACTION_STATUS =
+            "Transaction status must progress from AUTHORIZED, SETTLED, POSTED <%S> is not valid";
 
     // success messages
     public static final String MSG_DELETED_EMAIL = "You have successfully deleted your account.";

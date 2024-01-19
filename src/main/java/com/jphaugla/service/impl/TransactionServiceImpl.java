@@ -11,12 +11,14 @@ import com.jphaugla.exception.NotFoundException;
 import com.jphaugla.repository.MerchantRepository;
 import com.jphaugla.repository.TransactionRepository;
 import com.jphaugla.repository.TransactionReturnRepository;
+import com.jphaugla.repository.TransactionStatusInterface;
 import com.jphaugla.service.CustomerService;
 import com.jphaugla.service.TopicProducer;
 import com.jphaugla.service.TransactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -101,12 +103,13 @@ public class TransactionServiceImpl implements TransactionService {
                 "Grocery Stores", "MN", "US");
         log.info("before save merchant");
         merchantRepository.save(merchant);
+        List<String> tags = Arrays.asList("Groceries","Necesity");
 
         Transaction transaction = new Transaction(accountId,
                 "Debit", merchant.getName() + ":" + "acct01", "referenceKeyType",
                 "referenceKeyValue", 323.23, 323.22, "1631",
                 "Test Transaction", init_timestamp, settle_timestamp,
-                post_timestamp, "POSTED", null, null, "ATM665", "Outdoor");
+                post_timestamp, "POSTED", null, null, "ATM665", tags);
         log.info("before save transaction");
         if (doKafka) {
             try {
@@ -180,38 +183,70 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<Map<String, Object>> transactionStatusReport() {
-        return null;
+    public List<TransactionStatusInterface> transactionStatusReport() {
+        return transactionRepository.countByStatusInterface();
     }
 
     @Override
-    public List<Transaction> getCreditCardTransactions(String creditCard, Date startDate, Date endDate) {
-        return null;
+    public List<Transaction> getCreditCardTransactions(String creditCard, Date startDate, Date endDate) throws NotFoundException {
+        return transactionRepository.findByCreditCardAndPostingDateBetween(creditCard, startDate, endDate).
+                orElseThrow(() ->new NotFoundException(String.format(ERR_NO_TRANSACTIONS_FOUND_FOR,
+                "credit card: " + creditCard + " start date:" + startDate.toString() + " end date:" + endDate.toString())));
     }
 
     @Override
-    public List<Transaction> getAccountTransactions(String accountNo, Date startDate, Date endDate) {
-        return null;
+    public List<Transaction> getAccountTransactions(UUID accountId, Date startDate, Date endDate) {
+        return transactionRepository.findByAccountIdAndPostingDateBetween(accountId, startDate, endDate);
     }
 
     @Override
-    public void addTag(UUID transactionID, String tag, String operation) {
+    public List<String> addTag(UUID transactionId, String tag, String operation) throws NotFoundException {
+        log.info("transServiceImpl addTab operation: " + operation + " tag: " + tag);
+        if (operation.equals("add")) {
+            Transaction transaction = transactionRepository.findById(transactionId).orElseThrow(() ->
+                    new NotFoundException(String.format(ERR_TRANSACTION_NOT_FOUND, transactionId)));
+            List<String> existingTags = transaction.getTransactionTags();
+            if(existingTags != null && !existingTags.isEmpty()) {
+                log.info("current tag " + existingTags.toString());
+                existingTags.add(tag);
+                transaction.setTransactionTags(existingTags);
+            } else {
+                log.info("current tag is empty");
+                List<String> newTag = new ArrayList<String>();
+                newTag.add(tag);
+                transaction.setTransactionTags(newTag);
+            }
 
+            saveTransaction(transaction);
+            return transaction.getTransactionTags();
+        } else {
+            return null;
+        }
     }
 
     @Override
-    public String getTransactionTagList(UUID transactionID) {
-        return null;
+    public List<String> getTagList(UUID transactionId) throws NotFoundException {
+        Transaction transaction = transactionRepository.findById(transactionId).orElseThrow(() ->
+                new NotFoundException(String.format(ERR_TRANSACTION_NOT_FOUND, transactionId)));
+        return transaction.getTransactionTags();
     }
 
     @Override
-    public List<Transaction> getTaggedTransactions(String accountNo, String tag) {
-        return null;
+    public List<Transaction> getTaggedTransactions(UUID accountId, String tag) throws NotFoundException {
+        List<Transaction> transactions = transactionRepository.findByAccountIdAndTransactionTags(accountId, tag).orElseThrow(() ->
+                new NotFoundException(String.format(ERR_NO_TRANSACTIONS_FOUND_FOR,
+                        "accountId: " + accountId.toString() + " tag:" + tag)));
+        return transactions;
     }
 
     @Override
-    public Transaction mostRecentTransactions(String accountNo) {
-        return null;
+    public List<Transaction> mostRecentTransactions(UUID accountId) {
+        return transactionRepository.findByAccountIdAndPostingDateBeforeAndLimit(accountId);
+    }
+
+    @Override
+    public List<Transaction> getTransactionsByStatus(String statusToChange, Integer numberOfTransactions) {
+        return transactionRepository.findByStatus(statusToChange, Limit.of(numberOfTransactions));
     }
 
 

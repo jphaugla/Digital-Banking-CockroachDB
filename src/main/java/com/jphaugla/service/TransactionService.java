@@ -3,11 +3,11 @@ package com.jphaugla.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jphaugla.domain.Transaction;
 import com.jphaugla.exception.NotFoundException;
+import com.jphaugla.repository.TransactionStatusInterface;
 
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -24,17 +24,19 @@ public interface TransactionService {
 
     List<Transaction> getMerchantTransactions(String merchant, UUID account, Date startDate, Date endDate) throws NotFoundException;
 
-    List<Map<String, Object>> transactionStatusReport();
+    List<TransactionStatusInterface> transactionStatusReport();
 
-    List<Transaction> getCreditCardTransactions(String creditCard, Date startDate, Date endDate);
+    List<Transaction> getCreditCardTransactions(String creditCard, Date startDate, Date endDate) throws NotFoundException;
 
-    List<Transaction> getAccountTransactions(String accountNo, Date startDate, Date endDate);
+    List<Transaction> getAccountTransactions(UUID accountId, Date startDate, Date endDate);
 
-    void addTag(UUID transactionID, String tag, String operation);
+    List<String> addTag(UUID transactionID, String tag, String operation) throws NotFoundException;
 
-    String getTransactionTagList(UUID transactionID);
+    List<String> getTagList(UUID transactionID) throws NotFoundException;
 
-    List<Transaction> getTaggedTransactions(String accountNo, String tag);
+    List<Transaction> getTaggedTransactions(UUID accountId, String tag) throws NotFoundException;
 
-    Transaction mostRecentTransactions(String accountNo);
+    List<Transaction> mostRecentTransactions(UUID accountId);
+
+    List<Transaction> getTransactionsByStatus(String statusToChange, Integer numberOfTransactions);
 }

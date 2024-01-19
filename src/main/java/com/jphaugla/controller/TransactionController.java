@@ -3,7 +3,9 @@ package com.jphaugla.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jphaugla.domain.Transaction;
 import com.jphaugla.exception.InvalidUUIDException;
+import com.jphaugla.exception.InvalidValueException;
 import com.jphaugla.exception.NotFoundException;
+import com.jphaugla.repository.TransactionStatusInterface;
 import com.jphaugla.service.CustomerService;
 import com.jphaugla.service.TopicProducer;
 import com.jphaugla.service.TransactionService;
@@ -14,16 +16,15 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static com.jphaugla.util.Common.toUUID;
-import static com.jphaugla.util.Constants.ERR_INVALID_ACCOUNT;
-import static com.jphaugla.util.Constants.ERR_INVALID_TRANSACTION;
+import static com.jphaugla.util.Constants.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -101,27 +102,42 @@ public class TransactionController {
 
 	@GetMapping ("/transactionStatusReport")
 
-	public ResponseEntity<List<Map<String, Object>>>  transactionStatusReport () {
+	public ResponseEntity<List<TransactionStatusInterface>>  transactionStatusReport () {
 		return ResponseEntity.ok(transactionService.transactionStatusReport());
 
 	}
 
-	/*
-	@GetMapping("/statusChangeTransactions")
+	@PutMapping("/statusChange")
 
-	public AggregateResults<String> generateStatusChangeTransactions(@RequestParam String transactionStatus)
-			throws ParseException, IllegalAccessException, ExecutionException, InterruptedException {
-		 log.info("generateStatusChangeTransactions transactionStatus=" + transactionStatus);
-		 AggregateResults<String> changeReport = new AggregateResults<>();
+	public ResponseEntity<String> generateStatusChangeTransactions(@RequestParam String targetStatus
+	, @RequestParam Integer numberOfTransactions)
+			throws ParseException, IllegalAccessException, ExecutionException, InterruptedException, InvalidValueException {
+		 log.info("generateStatusChangeTransactions transactionStatus=" + targetStatus);
+		Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+		 String statusToChange;
+		 if (targetStatus.equals("POSTED")) {
+			 statusToChange = "SETTLED";
+		 } else if (targetStatus.equals("SETTLED")) {
+			 statusToChange = "AUTHORIZED";
+		 } else {
+			 throw new InvalidValueException(String.format(ERR_INVALID_TRANSACTION_STATUS,targetStatus));
+		 }
+		 List<Transaction> transactions = transactionService.getTransactionsByStatus(statusToChange,
+				 numberOfTransactions);
+		 for(Transaction transaction : transactions) {
+			 transaction.setStatus(targetStatus);
+			 if (targetStatus.equals("POSTED") ){
+				 transaction.setPostingDate(currentTime);
+			 } else {
+				 transaction.setSettlementDate(currentTime);
+			 }
+			 transactionService.saveTransaction(transaction);
+		 }
 
-		 changeReport.addAll(transactionStatusReport());
-		 bankService.transactionStatusChange(transactionStatus);
-		 changeReport.addAll(transactionStatusReport());
-
-		 return changeReport;
+		 return ResponseEntity.ok("Done");
 
 	}
-	*/
+
 
 	@GetMapping("/creditCard")
 
@@ -129,7 +145,7 @@ public class TransactionController {
 			(@RequestParam String creditCard,
 			 @RequestParam(name = "from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
 			 @RequestParam(name = "to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate)
-			throws ParseException {
+			throws ParseException, NotFoundException {
 		log.debug("getCreditCardTransactions creditCard=" + creditCard +
 				" startDate=" + startDate + " endDate=" + endDate);
 		return ResponseEntity.ok(transactionService.getCreditCardTransactions(creditCard, startDate, endDate));
@@ -137,45 +153,45 @@ public class TransactionController {
 
 	@GetMapping("/account")
 	public ResponseEntity<List<Transaction>>  getAccountTransactions
-			(@RequestParam String accountNo,
+			(@RequestParam String accountId,
 			 @RequestParam(name = "from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
 			 @RequestParam(name = "to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate)
-			throws ParseException {
-		log.debug("getCreditCardTransactions creditCard=" + accountNo +
+			throws ParseException, InvalidUUIDException {
+		log.debug("getCreditCardTransactions creditCard=" + accountId +
 				" startDate=" + startDate + " endDate=" + endDate);
-		return ResponseEntity.ok(transactionService.getAccountTransactions(accountNo, startDate, endDate));
-
+		return ResponseEntity.ok(transactionService.getAccountTransactions(toUUID(accountId,ERR_INVALID_ACCOUNT), startDate, endDate));
 	}
 
-	@GetMapping("/addTag")
+	@PutMapping("/addTag")
 	public ResponseEntity<String> addTag(@RequestParam String transactionId,
-					   @RequestParam String tag, @RequestParam String operation) throws InvalidUUIDException {
+					   @RequestParam String tag, @RequestParam String operation) throws InvalidUUIDException, NotFoundException {
 		log.debug("addTags with transactionId=" + transactionId + " tag is " + tag + " operation is " + operation);
 		transactionService.addTag(toUUID(transactionId, ERR_INVALID_TRANSACTION), tag, operation);
 		return ResponseEntity.ok("Done");
 	}
 
 	@GetMapping("/getTags")
-	public ResponseEntity <String> getTransactionTagList(@RequestParam String transactionId) throws InvalidUUIDException {
+	public ResponseEntity<List<String>> getTransactionTagList(@RequestParam String transactionId)
+			throws InvalidUUIDException, NotFoundException {
 		log.debug("getTags with transactionId=" + transactionId);
-		return ResponseEntity.ok(transactionService.getTransactionTagList(toUUID(transactionId, ERR_INVALID_TRANSACTION)));
+		return ResponseEntity.ok(transactionService.getTagList(toUUID(transactionId, ERR_INVALID_TRANSACTION)));
 	}
 
-	@GetMapping("/getTaggedTransactions")
+	@GetMapping("/getTagged")
 
 	public ResponseEntity<List<Transaction>>  getTaggedTransactions
-			(@RequestParam String accountNo, @RequestParam String tag)
-			throws ParseException {
-		log.debug("In getTaggedTransactions accountNo=" + accountNo + " tag=" + tag );
-		return ResponseEntity.ok(transactionService.getTaggedTransactions(accountNo, tag));
+			(@RequestParam String accountId, @RequestParam String tag)
+			throws ParseException, InvalidUUIDException, NotFoundException {
+		log.debug("In getTaggedTransactions accountNo=" + accountId + " tag=" + tag );
+		return ResponseEntity.ok(transactionService.getTaggedTransactions(toUUID(accountId,ERR_INVALID_ACCOUNT), tag));
 	}
 
-	@GetMapping("/mostRecentTransactions")
-	public ResponseEntity<Transaction> mostRecentTransactions
-			(@RequestParam String accountNo)
-			throws ParseException {
-		log.debug("In mostRecentTransactions accountNo=" + accountNo  );
-		return ResponseEntity.ok(transactionService.mostRecentTransactions(accountNo));
+	@GetMapping("/mostRecent")
+	public ResponseEntity<List<Transaction>> mostRecentTransactions
+			(@RequestParam String accountId)
+			throws ParseException, InvalidUUIDException {
+		log.debug("In mostRecentTransactions accountNo=" + accountId  );
+		return ResponseEntity.ok(transactionService.mostRecentTransactions(toUUID(accountId, ERR_INVALID_ACCOUNT)));
 	}
 
 

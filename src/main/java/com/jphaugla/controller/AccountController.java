@@ -30,7 +30,7 @@ public class AccountController {
 
 
 	//  transaction
-	@GetMapping("/save")
+	@PutMapping("/save")
 	public ResponseEntity<Account> saveSampleAccount(@RequestParam String customerId)
 			throws ParseException, InvalidUUIDException {
 		log.info("starting save account");

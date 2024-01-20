@@ -6,8 +6,8 @@ services:
    hostname: crdb1
    ports:
      - "26257:26257"
-     - "8080:8080"
-   command: start --insecure --store=node1 --listen-addr=crdb1:26257 --http-addr=crdb1:8080 --join=crdb1:26257,crdb2:26258,crdb3:26259
+     - "8079:8079"
+   command: start --insecure --store=node1 --listen-addr=crdb1:26257 --http-addr=crdb1:8079 --join=crdb1:26257,crdb2:26258,crdb3:26259
    volumes:
      - "${PWD}/cockroach-data/crdb1:/cockroach/cockroach-data"
      - "${PWD}/scripts:/scripts"

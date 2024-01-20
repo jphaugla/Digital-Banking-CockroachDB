@@ -38,6 +38,7 @@ public class DisputeServiceImpl implements DisputeService {
     @Override
     public UUID saveDispute(Dispute dispute) {
         log.info("disputeService.savedispute");
+        dispute.setCurrentTime();
         disputeRepository.save(dispute);
         return dispute.getId();
     }
@@ -83,13 +84,13 @@ public class DisputeServiceImpl implements DisputeService {
     }
 
     public String postDispute(Dispute dispute) throws NotFoundException {
-        log.info("in bs.postDispute with Dispute =" + dispute);
+        log.info("in postDispute with Dispute =" + dispute);
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
 
         //  incoming is only a date and not a timestamp, change to a timestamp
 
         // dispute.setFilingDate(filingDateTime);
-        dispute.setLastUpdateDate(currentTimestamp);
+        dispute.setCurrentTime();
         Transaction transaction = transactionRepository.findById(dispute.getTranId()).orElseThrow(() ->
                 new NotFoundException (String.format(ERR_TRANSACTION_NOT_FOUND, dispute.getTranId())));
         dispute.setChargeBackAmount(transaction.getAmount());
@@ -104,20 +105,13 @@ public class DisputeServiceImpl implements DisputeService {
         Dispute dispute = disputeRepository.findById(disputeId).orElseThrow(() ->
                 new NotFoundException (String.format(ERR_DISPUTE_NOT_FOUND, disputeId)));
         dispute.setChargeBackReason(reasonCode);
-        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
-        dispute.setLastUpdateDate(currentTimestamp);
-        dispute.setReviewDate(currentTimestamp);
-        dispute.setStatus("Investigate");
         disputeRepository.save(dispute);
         return dispute;
     }
     public Dispute acceptDisputeChargeBackReason(UUID disputeId) throws NotFoundException {
         Dispute dispute = disputeRepository.findById(disputeId).orElseThrow(() ->
                 new NotFoundException (String.format(ERR_DISPUTE_NOT_FOUND, disputeId)));
-        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
-        dispute.setLastUpdateDate(currentTimestamp);
-        dispute.setAcceptanceChargeBackDate(currentTimestamp);
-        dispute.setStatus("ChargedBack");
+        dispute.acceptChargeBack();
         disputeRepository.save(dispute);
         return dispute;
     }
@@ -125,10 +119,7 @@ public class DisputeServiceImpl implements DisputeService {
     public Dispute resolvedDispute(UUID disputeId) throws NotFoundException {
         Dispute dispute = disputeRepository.findById(disputeId).orElseThrow(() ->
                 new NotFoundException (String.format(ERR_DISPUTE_NOT_FOUND, disputeId)));
-        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
-        dispute.setLastUpdateDate(currentTimestamp);
-        dispute.setResolutionDate(currentTimestamp);
-        dispute.setStatus("Resolved");
+        dispute.resolved();
         return dispute;
     }
 }

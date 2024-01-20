@@ -1,2 +1,2 @@
 # save a sample account
-curl -X PUT 'http://localhost:5001/api/account/save?customerId=9e9e54f9-cae7-43bc-b89b-7091971d0001'
+curl -X PUT 'http://localhost:8080/api/account/save?customerId=a01317ab-6a09-4cfc-bda9-35027677fd8a'

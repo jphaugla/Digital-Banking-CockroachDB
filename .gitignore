@@ -30,6 +30,7 @@ replay_pid*
 
 ###  ds_store
 **/.DS_Store
+.DS_Store
 
 ### IntelliJ IDEA ###
 .idea

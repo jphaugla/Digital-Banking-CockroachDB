@@ -2,7 +2,7 @@
 version: '2'
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.2.0
+    image: confluentinc/cp-zookeeper:7.5.0
     hostname: zookeeper
     container_name: zookeeper
     ports:
@@ -12,7 +12,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
 
   broker:
-    image: confluentinc/cp-server:7.2.0
+    image: confluentinc/cp-server:7.5.0
     hostname: broker
     container_name: broker
     depends_on:
@@ -41,7 +41,7 @@ services:
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:7.2.0
+    image: confluentinc/cp-schema-registry:7.5.0
     hostname: schema-registry
     container_name: schema-registry
     depends_on:
@@ -54,7 +54,11 @@ services:
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
   connect:
-    image: confluentinc/cp-kafka-connect:7.2.0
+#    image: cnfldemos/cp-server-connect-datagen:0.6.2-7.5.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: connect
     hostname: connect
     container_name: connect
     depends_on:
@@ -62,8 +66,6 @@ services:
       - schema-registry
     ports:
       - "8083:8083"
-    volumes:
-      - ./confluent-hub-components:/usr/share/confluent-hub-components/
     environment:
       CONNECT_BOOTSTRAP_SERVERS: 'broker:29092'
       CONNECT_REST_ADVERTISED_HOST_NAME: connect
@@ -79,14 +81,14 @@ services:
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
       # CLASSPATH required due to CC-2422
-      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-7.2.0.jar
+      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-7.5.0.jar
       CONNECT_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
       CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
       CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
 
   control-center:
-    image: confluentinc/cp-enterprise-control-center:7.2.0
+    image: confluentinc/cp-enterprise-control-center:7.5.0
     hostname: control-center
     container_name: control-center
     depends_on:
@@ -109,7 +111,7 @@ services:
       PORT: 9021
 
   ksqldb-server:
-    image: confluentinc/cp-ksqldb-server:7.2.0
+    image: confluentinc/cp-ksqldb-server:7.5.0
     hostname: ksqldb-server
     container_name: ksqldb-server
     depends_on:
@@ -132,7 +134,7 @@ services:
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'true'
 
   rest-proxy:
-    image: confluentinc/cp-kafka-rest:7.2.0
+    image: confluentinc/cp-kafka-rest:7.5.0
     depends_on:
       - broker
       - schema-registry

@@ -7,6 +7,7 @@ import com.jphaugla.domain.Account;
 import com.jphaugla.domain.Merchant;
 import com.jphaugla.domain.Transaction;
 import com.jphaugla.domain.TransactionReturn;
+import com.jphaugla.exception.InvalidValueException;
 import com.jphaugla.exception.NotFoundException;
 import com.jphaugla.repository.MerchantRepository;
 import com.jphaugla.repository.TransactionRepository;
@@ -27,8 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-import static com.jphaugla.util.Constants.ERR_NO_TRANSACTIONS_FOUND_FOR;
-import static com.jphaugla.util.Constants.ERR_TRANSACTION_NOT_FOUND;
+import static com.jphaugla.util.Constants.*;
 
 @Slf4j
 @Service
@@ -200,28 +200,40 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<String> addTag(UUID transactionId, String tag, String operation) throws NotFoundException {
-        log.info("transServiceImpl addTab operation: " + operation + " tag: " + tag);
-        if (operation.equals("add")) {
-            Transaction transaction = transactionRepository.findById(transactionId).orElseThrow(() ->
-                    new NotFoundException(String.format(ERR_TRANSACTION_NOT_FOUND, transactionId)));
-            List<String> existingTags = transaction.getTransactionTags();
-            if(existingTags != null && !existingTags.isEmpty()) {
-                log.info("current tag " + existingTags.toString());
-                existingTags.add(tag);
-                transaction.setTransactionTags(existingTags);
-            } else {
-                log.info("current tag is empty");
-                List<String> newTag = new ArrayList<String>();
-                newTag.add(tag);
-                transaction.setTransactionTags(newTag);
-            }
-
-            saveTransaction(transaction);
-            return transaction.getTransactionTags();
+    public List<String> addTag(UUID transactionId, String tag) throws NotFoundException, InvalidValueException {
+        log.info("transServiceImpl addTab operation tag: " + tag);
+        Transaction transaction = transactionRepository.findById(transactionId).orElseThrow(() ->
+                new NotFoundException(String.format(ERR_TRANSACTION_NOT_FOUND, transactionId)));
+        List<String> existingTags = transaction.getTransactionTags();
+        if(existingTags != null && !existingTags.isEmpty()) {
+            log.info("current tag " + existingTags.toString());
+            existingTags.add(tag);
+            transaction.setTransactionTags(existingTags);
         } else {
-            return null;
+            log.info("current tag is empty");
+            List<String> newTag = new ArrayList<String>();
+            newTag.add(tag);
+            transaction.setTransactionTags(newTag);
         }
+        saveTransaction(transaction);
+        return transaction.getTransactionTags();
+    }
+    @Override
+    public List<String> deleteTag(UUID transactionId, String tag) throws NotFoundException {
+        log.info("transServiceImpl delete Tag operation: tag:" + tag);
+        Transaction transaction = transactionRepository.findById(transactionId).orElseThrow(() ->
+                new NotFoundException(String.format(ERR_TRANSACTION_NOT_FOUND, transactionId)));
+        List<String> existingTags = transaction.getTransactionTags();
+        if(existingTags != null && !existingTags.isEmpty()) {
+            log.info("current tag " + existingTags.toString());
+            existingTags.remove(tag);
+        } else {
+            log.info("current tag is empty");
+                throw new NotFoundException(String.format(ERR_TAG_NOT_FOUND,
+                        transactionId.toString()));
+        }
+        saveTransaction(transaction);
+        return transaction.getTransactionTags();
     }
 
     @Override

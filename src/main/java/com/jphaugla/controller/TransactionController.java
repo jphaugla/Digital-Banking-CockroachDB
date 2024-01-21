@@ -9,6 +9,7 @@ import com.jphaugla.repository.TransactionStatusInterface;
 import com.jphaugla.service.CustomerService;
 import com.jphaugla.service.TopicProducer;
 import com.jphaugla.service.TransactionService;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +32,7 @@ import static com.jphaugla.util.Constants.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/transaction")
+
 public class TransactionController {
 
 	@Autowired
@@ -163,11 +166,24 @@ public class TransactionController {
 	}
 
 	@PutMapping("/addTag")
-	public ResponseEntity<String> addTag(@RequestParam String transactionId,
-					   @RequestParam String tag, @RequestParam String operation) throws InvalidUUIDException, NotFoundException {
+	public ResponseEntity<List<String>> addTag(@RequestParam String transactionId,
+					   @RequestParam String tag, @RequestParam String operation)
+			throws InvalidUUIDException, NotFoundException, InvalidValueException {
 		log.debug("addTags with transactionId=" + transactionId + " tag is " + tag + " operation is " + operation);
-		transactionService.addTag(toUUID(transactionId, ERR_INVALID_TRANSACTION), tag, operation);
-		return ResponseEntity.ok("Done");
+		List<String> validOperations = new ArrayList<String>();
+		List<String> returnedTags = new ArrayList<String>();
+		validOperations.add("add");
+		validOperations.add("delete");
+		if(validOperations.contains(operation)) {
+			if(operation.equals("delete")) {
+				returnedTags=transactionService.deleteTag(toUUID(transactionId, ERR_INVALID_TRANSACTION), tag);
+			} else {
+				returnedTags=transactionService.addTag(toUUID(transactionId, ERR_INVALID_TRANSACTION), tag);
+			}
+		} else {
+			throw new InvalidValueException(String.format(ERR_INVALID_TAG_OPERATION,operation));
+		}
+		return ResponseEntity.ok(returnedTags);
 	}
 
 	@GetMapping("/getTags")

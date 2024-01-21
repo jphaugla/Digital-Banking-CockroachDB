@@ -2,6 +2,7 @@ package com.jphaugla.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jphaugla.domain.Transaction;
+import com.jphaugla.exception.InvalidValueException;
 import com.jphaugla.exception.NotFoundException;
 import com.jphaugla.repository.TransactionStatusInterface;
 
@@ -30,7 +31,7 @@ public interface TransactionService {
 
     List<Transaction> getAccountTransactions(UUID accountId, Date startDate, Date endDate);
 
-    List<String> addTag(UUID transactionID, String tag, String operation) throws NotFoundException;
+    List<String> addTag(UUID transactionID, String tag) throws NotFoundException, InvalidValueException;
 
     List<String> getTagList(UUID transactionID) throws NotFoundException;
 
@@ -39,4 +40,6 @@ public interface TransactionService {
     List<Transaction> mostRecentTransactions(UUID accountId);
 
     List<Transaction> getTransactionsByStatus(String statusToChange, Integer numberOfTransactions);
+
+    List<String> deleteTag(UUID uuid, String tag)throws NotFoundException;
 }

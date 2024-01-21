@@ -25,6 +25,8 @@ public class Constants {
     public static final String ERR_NO_TRANSACTIONS_FOUND_FOR = "No transaction found for <%s>";
     public static final String ERR_INVALID_TRANSACTION_STATUS =
             "Transaction status must progress from AUTHORIZED, SETTLED, POSTED <%S> is not valid";
+    public static final String ERR_INVALID_TAG_OPERATION = "Invalid tag operation <%s>";
+    public static final String ERR_TAG_NOT_FOUND = "Tag to remove not found on transaction <%s>";
 
     // success messages
     public static final String MSG_DELETED_EMAIL = "You have successfully deleted your account.";

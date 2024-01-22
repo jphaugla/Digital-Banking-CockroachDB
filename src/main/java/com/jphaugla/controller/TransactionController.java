@@ -114,7 +114,7 @@ public class TransactionController {
 
 	public ResponseEntity<String> generateStatusChangeTransactions(@RequestParam String targetStatus
 	, @RequestParam Integer numberOfTransactions)
-			throws ParseException, IllegalAccessException, ExecutionException, InterruptedException, InvalidValueException {
+			throws ParseException, IllegalAccessException, ExecutionException, InterruptedException, InvalidValueException, JsonProcessingException {
 		 log.info("generateStatusChangeTransactions transactionStatus=" + targetStatus);
 		Timestamp currentTime = new Timestamp(System.currentTimeMillis());
 		 String statusToChange;
@@ -168,7 +168,7 @@ public class TransactionController {
 	@PutMapping("/addTag")
 	public ResponseEntity<List<String>> addTag(@RequestParam String transactionId,
 					   @RequestParam String tag, @RequestParam String operation)
-			throws InvalidUUIDException, NotFoundException, InvalidValueException {
+			throws InvalidUUIDException, NotFoundException, InvalidValueException, JsonProcessingException {
 		log.debug("addTags with transactionId=" + transactionId + " tag is " + tag + " operation is " + operation);
 		List<String> validOperations = new ArrayList<String>();
 		List<String> returnedTags = new ArrayList<String>();

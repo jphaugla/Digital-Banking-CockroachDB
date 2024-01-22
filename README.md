@@ -69,18 +69,22 @@ git clone https://github.com/jphaugla/CockroachDBearch-Digital-Banking.git
 ```
 * Refer to the notes for CockroachDB Docker images used but don't get too bogged down as docker compose handles everything except for a few admin steps on tomcat.
  * [CockroachDB stack docker instructions](https://CockroachDB.io/docs/stack/get-started/install/docker/)
-* Open terminal and change to the github home where you will see the docker-compose.yml file, then: 
+* Open terminal and change to the github home where you will see the docker-compose.yml file and bring up docker
+* Add the jhaugland user name and give it full permissions
 ```bash
 docker-compose -f docker-compose-kafka.yml -f docker-compose.yml up -d
+cockroach sql --insecure 
+> create user jhaugland;
+> grant all on database defautldb to jhaugland;
 ```
 ## Deploying java application on local mac with Kafka non-application components
 * ensure maven and java are deployed on the local machine
   * have been running with java 17 or java 18 but other versions should work as well
-  * have been runing with 3.9.4 and 3.9.5
+  * have been running with maven 14.2.1
 * Set up the environment and run the java application locally
   * edit the [environment file](scripts/setEnv.sh) to use localhost for non-application components
   * source this environment file
-  * run the application
+  * run the application.  Note it will fail because jhaugland username is not 
 ```bash
 source  scripts/setEnv.sh
 java -jar target/cockroachDB-0.0.1-SNAPSHOT.jar
@@ -91,7 +95,7 @@ java -jar target/cockroachDB-0.0.1-SNAPSHOT.jar
 * Use [this github](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module)  to deploy all of the components (including the application)
 * Check the [readme](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/README.md) for the details on deploying this github including the cloning the github and working with Azure.  Completely deploy the terraform github for all deployments.  This will also deploy [this github](https://github.com/jphaugla/CockroachDBearch-Digital-Banking-CockroachDBTemplate) inside the tester node.  The later application deployment instructions will be deployed within the tester node using ssh
 * maven and java will be installed by the ansible jobs for the tester node
-* the ip and dns information is shared in a [temp directory](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/provisioners/temp) within the terraform/ansible repository.  Go to the files here to see private (internal) and public (external) kafka node, cassandra node and testinnode IP addresses.  The CockroachDB internal and external database connection dns names are also available.  These dns names will also give an internal and external CockroachDB enterprise node IP.
+* the ip information is shared in a [temp directory](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/provisioners/temp) within the terraform/ansible repository.  Go to the files here to see private (internal) and public (external) kafka node, cassandra node and testinnode IP addresses.  The CockroachDB internal and external database connection dns names are also available.  These dns names will also give an internal and external CockroachDB enterprise node IP.
 * log into the tester node using the testernode IP and the ssh key defined in test/main.tf and go to github home
 ```bash
 ssh -i <azure key> adminuser@<testerIP>
@@ -145,8 +149,6 @@ cd Digital-Banking-CockroachDB/scripts
 ssh -i ~/.ssh/<sshkey> adminusers@<testernode public ip>
 ./transaction/saveTransaction.sh
 ```
-verify data flowed in to cassandra using cqlsh
-
 ##  process larger record set
 verify generateData.sh says doKafkfa=true
 ```bash

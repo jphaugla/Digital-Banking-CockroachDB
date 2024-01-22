@@ -53,14 +53,19 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Transaction saveTransaction(Transaction transaction) {
-        // log.info("transactionService.saveTransaction");
+    public Transaction saveTransaction(Transaction transaction) throws JsonProcessingException {
+        log.info("transactionService.saveTransaction");
+        String jsonStr = objectMapper.writeValueAsString(transaction);
+        log.info("object contents: " + jsonStr);
         return transactionRepository.save(transaction);
     }
     private void writeTransactionKafka(Transaction randomTransaction) throws JsonProcessingException {
         try {
+            log.info("writeTransactionKafka started");
+            UUID key = UUID.randomUUID();
+            //  must set the Id of the transaction
+            randomTransaction.setId(key);
             String jsonStr = objectMapper.writeValueAsString(randomTransaction);
-            UUID key = randomTransaction.getId();
             topicProducer.send(jsonStr, String.valueOf(randomTransaction.getId()));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -89,7 +94,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public UUID saveSampleTransaction(UUID accountId, Boolean doKafka) throws ParseException {
+    public UUID saveSampleTransaction(UUID accountId, Boolean doKafka) throws ParseException, JsonProcessingException {
         Date settle_date = new SimpleDateFormat("yyyy/MM/dd").
                 parse("2021/07/28");
         Timestamp settle_timestamp = new Timestamp((settle_date.getTime()));
@@ -171,8 +176,6 @@ public class TransactionServiceImpl implements TransactionService {
                         + " end date:" + endDate.toString())));
     }
 
-
-
     @Override
     public List<Transaction> getMerchantTransactions(String merchant, UUID account, Date startDate, Date endDate)
             throws NotFoundException {
@@ -200,7 +203,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<String> addTag(UUID transactionId, String tag) throws NotFoundException, InvalidValueException {
+    public List<String> addTag(UUID transactionId, String tag) throws NotFoundException, InvalidValueException, JsonProcessingException {
         log.info("transServiceImpl addTab operation tag: " + tag);
         Transaction transaction = transactionRepository.findById(transactionId).orElseThrow(() ->
                 new NotFoundException(String.format(ERR_TRANSACTION_NOT_FOUND, transactionId)));
@@ -219,7 +222,7 @@ public class TransactionServiceImpl implements TransactionService {
         return transaction.getTransactionTags();
     }
     @Override
-    public List<String> deleteTag(UUID transactionId, String tag) throws NotFoundException {
+    public List<String> deleteTag(UUID transactionId, String tag) throws NotFoundException, JsonProcessingException {
         log.info("transServiceImpl delete Tag operation: tag:" + tag);
         Transaction transaction = transactionRepository.findById(transactionId).orElseThrow(() ->
                 new NotFoundException(String.format(ERR_TRANSACTION_NOT_FOUND, transactionId)));

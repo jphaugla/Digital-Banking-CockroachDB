@@ -13,7 +13,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public interface TransactionService {
-    Transaction saveTransaction (Transaction  transaction );
+    Transaction saveTransaction (Transaction  transaction ) throws JsonProcessingException;
     Transaction  getTransactionById(UUID id) throws NotFoundException;
     void deleteTransaction(UUID id) throws NotFoundException;
 
@@ -31,7 +31,7 @@ public interface TransactionService {
 
     List<Transaction> getAccountTransactions(UUID accountId, Date startDate, Date endDate);
 
-    List<String> addTag(UUID transactionID, String tag) throws NotFoundException, InvalidValueException;
+    List<String> addTag(UUID transactionID, String tag) throws NotFoundException, InvalidValueException, JsonProcessingException;
 
     List<String> getTagList(UUID transactionID) throws NotFoundException;
 
@@ -41,5 +41,5 @@ public interface TransactionService {
 
     List<Transaction> getTransactionsByStatus(String statusToChange, Integer numberOfTransactions);
 
-    List<String> deleteTag(UUID uuid, String tag)throws NotFoundException;
+    List<String> deleteTag(UUID uuid, String tag) throws NotFoundException, JsonProcessingException;
 }

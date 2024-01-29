@@ -26,11 +26,12 @@ hs_err_pid*
 replay_pid*
 
 # docker cockroach directory
-./cockroach-data
+cockroach-data/
 
 ###  ds_store
 **/.DS_Store
 .DS_Store
+terraform*
 
 ### IntelliJ IDEA ###
 .idea

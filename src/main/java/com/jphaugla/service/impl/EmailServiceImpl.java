@@ -1,11 +1,14 @@
 package com.jphaugla.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jphaugla.domain.Email;
 import com.jphaugla.exception.NotFoundException;
 import com.jphaugla.repository.EmailRepository;
 import com.jphaugla.service.EmailService;
+import com.jphaugla.service.TopicProducerSchema;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +22,10 @@ public class EmailServiceImpl implements EmailService {
  
     @Autowired
     private EmailRepository emailRepository;
+    @Autowired
+    private TopicProducerSchema topicProducerSchema;
+    @Value("${topic.name.email}")
+    private String emailTopic;
 
 
     public EmailServiceImpl(EmailRepository emailRepository) {
@@ -30,6 +37,13 @@ public class EmailServiceImpl implements EmailService {
     public Email saveEmail(Email email) {
         log.info("emailService.saveEmail");
         return emailRepository.save(email);
+    }
+
+    @Override
+    public Email saveEmailKafka(Email email) throws JsonProcessingException {
+        log.info("emailService.saveEmail");
+        topicProducerSchema.send(emailTopic, email.getAddress(), email);
+        return email;
     }
 
     @Override

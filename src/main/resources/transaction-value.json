@@ -1,0 +1,102 @@
+{
+    "type": "struct",
+    "fields": [
+      {
+        "type": "string",
+        "optional": false,
+        "field": "id"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "default": null,
+        "field": "accountId"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "default": null,
+        "field": "referenceKeyType"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "default": null,
+        "field": "referenceKeyValue"
+      },
+      {
+        "type": "double",
+        "optional": true,
+        "default": null,
+        "field": "amount"
+      },
+      {
+        "type": "double",
+        "optional": true,
+        "default": null,
+        "field": "originalAmount"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "default": null,
+        "field": "tranCode"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "default": null,
+        "field": "description"
+      },
+      {
+        "type": "int64",
+        "optional": true,
+        "default": null,
+        "name": "org.apache.kafka.connect.data.Timestamp",
+        "logicalType": "timestamp-millis",
+        "field": "initialDate"
+      },
+      {
+        "type": "int64",
+        "optional": true,
+        "default": null,
+        "name": "org.apache.kafka.connect.data.Timestamp",
+        "logicalType": "timestamp-millis",
+        "field": "settlementDate"
+      },
+      {
+        "type": "int64",
+        "optional": true,
+        "default": null,
+        "name": "org.apache.kafka.connect.data.Timestamp",
+        "logicalType": "timestamp-millis",
+        "field": "postingDate"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "default": null,
+        "field": "status"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "default": null,
+        "field": "disputeId"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "default": null,
+        "field": "transactionReturn"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "default": null,
+        "field": "location"
+      }
+    ],
+    "optional": false,
+    "name": "com.jphaugla.domain.Test"
+}

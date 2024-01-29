@@ -2,7 +2,6 @@ package com.jphaugla.controller;
 
 import java.text.ParseException;
 import java.util.List;
-import java.util.UUID;
 
 import com.jphaugla.domain.Customer;
 import com.jphaugla.domain.Email;
@@ -12,7 +11,6 @@ import com.jphaugla.exception.NotFoundException;
 import com.jphaugla.service.CustomerService;
 import com.jphaugla.service.EmailService;
 import com.jphaugla.service.PhoneService;
-import com.jphaugla.service.TopicProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

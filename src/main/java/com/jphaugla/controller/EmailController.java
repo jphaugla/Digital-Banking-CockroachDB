@@ -1,5 +1,6 @@
 package com.jphaugla.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jphaugla.domain.Account;
 import com.jphaugla.domain.Email;
 import com.jphaugla.exception.InvalidUUIDException;
@@ -45,6 +46,13 @@ public class EmailController {
 	@PostMapping(value = "/postEmail", consumes = "application/json", produces = "application/json")
 	public  ResponseEntity<String> postEmail(@RequestBody Email email ) throws ParseException {
 		emailService.saveEmail(email);
+		return  ResponseEntity.ok(email.getAddress());
+	}
+	@PostMapping(value = "/saveKafka", consumes = "application/json", produces = "application/json")
+	public  ResponseEntity<String> saveKafkaEmail(@RequestBody Email email )
+			throws ParseException, JsonProcessingException {
+		log.info("started saveKafka" + email.toString());
+		emailService.saveEmailKafka(email);
 		return  ResponseEntity.ok(email.getAddress());
 	}
 }

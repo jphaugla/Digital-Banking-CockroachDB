@@ -7,9 +7,7 @@ import com.jphaugla.exception.InvalidValueException;
 import com.jphaugla.exception.NotFoundException;
 import com.jphaugla.repository.TransactionStatusInterface;
 import com.jphaugla.service.CustomerService;
-import com.jphaugla.service.TopicProducer;
 import com.jphaugla.service.TransactionService;
-import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +37,7 @@ public class TransactionController {
 	private CustomerService customerService;
 	@Autowired
 	private TransactionService transactionService;
-	private final TopicProducer topicProducer;
+
 
 
 	//  transaction
@@ -63,11 +61,13 @@ public class TransactionController {
 		Transaction transaction = transactionService.getTransactionById(toUUID(transactionId, ERR_INVALID_TRANSACTION));
 		return ResponseEntity.ok(transaction);
 	}
+	/*
 	//  test send message
 	@GetMapping (value = "/send")
 	public void send() throws ExecutionException, InterruptedException {
 		topicProducer.send("Mensagem de teste enviada ao tópico", "mensagem");
 	}
+	*/
 
 	@GetMapping("/generateData")
 	public ResponseEntity<String> generateData (@RequestParam Integer noOfCustomers, @RequestParam Integer noOfTransactions,

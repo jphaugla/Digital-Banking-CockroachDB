@@ -1,0 +1,34 @@
+{
+    "type": "struct",
+    "fields": [
+      {
+        "type": "string",
+        "optional": false,
+        "field": "col1"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "col2"
+      },
+      {
+        "type": "double",
+        "optional": true,
+        "field": "amount"
+      },
+      {
+        "type": "int64",
+        "optional": true,
+        "name": "org.apache.kafka.connect.data.Timestamp",
+        "logicalType": "timestamp-millis",
+        "field": "posting"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "customer"
+      }
+    ],
+    "optional": false,
+    "name": "com.jphaugla.domain.Test"
+}

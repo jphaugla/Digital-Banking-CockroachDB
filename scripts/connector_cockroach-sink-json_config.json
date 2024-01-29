@@ -1,0 +1,23 @@
+{
+  "name": "cockroach-sink-json",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "4",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "io.confluent.connect.json.JsonSchemaConverter",
+    "errors.log.enable": "true",
+    "errors.log.include.messages": "true",
+    "topics": "transactions",
+    "connection.url": "jdbc:postgresql://haproxy:26256/defaultdb?sslmode=disable",
+    "connection.user": "jhaugland",
+    "insert.mode": "insert",
+    "batch.size": "128",
+    "pk.mode": "record_value",
+    "pk.fields": "id",
+    "auto.create": "true",
+    "auto.evolve": "false",
+    "consumer.override.max.poll.records": "128",
+    "value.converter.schema.registry.url": "http://schema-registry:8081",
+    "value.converter.schemas.enable": "true"
+  }
+}

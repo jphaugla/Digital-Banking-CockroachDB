@@ -14,11 +14,12 @@ import com.jphaugla.repository.TransactionRepository;
 import com.jphaugla.repository.TransactionReturnRepository;
 import com.jphaugla.repository.TransactionStatusInterface;
 import com.jphaugla.service.CustomerService;
-import com.jphaugla.service.TopicProducer;
+import com.jphaugla.service.TopicProducerSchema;
 import com.jphaugla.service.TransactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 
@@ -43,9 +44,11 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     CustomerService customerService;
     @Autowired
-    private TopicProducer topicProducer;
+    private TopicProducerSchema topicProducerSchema;
     @Autowired
     ObjectMapper objectMapper;
+    @Value("${topic.name.transaction}")
+    private String transactionTopic;
 
     public TransactionServiceImpl(TransactionRepository transactionRepository) {
         super();
@@ -60,16 +63,11 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.save(transaction);
     }
     private void writeTransactionKafka(Transaction randomTransaction) throws JsonProcessingException {
-        try {
-            log.info("writeTransactionKafka started");
-            UUID key = UUID.randomUUID();
-            //  must set the Id of the transaction
-            randomTransaction.setId(key);
-            String jsonStr = objectMapper.writeValueAsString(randomTransaction);
-            topicProducer.send(jsonStr, String.valueOf(randomTransaction.getId()));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        log.info("writeTransactionKafka started");
+        UUID key = UUID.randomUUID();
+        //  must set the Id of the transaction
+        randomTransaction.setId(key);
+        topicProducerSchema.send(transactionTopic, key.toString(), randomTransaction);
 
     }
 
@@ -113,8 +111,8 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = new Transaction(accountId,
                 "Debit", merchant.getName() + ":" + "acct01", "referenceKeyType",
                 "referenceKeyValue", 323.23, 323.22, "1631",
-                "Test Transaction", init_timestamp, settle_timestamp,
-                post_timestamp, "POSTED", null, null, "ATM665", tags);
+                "Test Transaction", null, null,
+                null, "POSTED", null, null, "ATM665", null);
         log.info("before save transaction");
         if (doKafka) {
             try {

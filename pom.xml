@@ -14,7 +14,6 @@
 	<name>cockroach</name>
 	<description>Demo project for Spring Boot with CockroachDB</description>
 	<packaging>jar</packaging>
-
 	<properties>
 		<start-class>com.jphaugla.DemoApplication</start-class>
 	</properties>
@@ -71,17 +70,6 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-<!--		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<scope>runtime</scope>
-			<optional>true</optional>
-		</dependency>-->
-		<!--<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
-			<version>6.4.1.Final</version>
-		</dependency>-->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>

@@ -131,7 +131,7 @@ cd Digital-Banking-CockroachDB/scripts
 #  change localhost to the external/public ip address for the kafka node in the last line. 
 #  Make sure this is the public kafka IP and not the private  
 #  Verify the CockroachDB.uri and CockroachDB.password.  (the CockroachDB.uri must be INTERNAL)
-./createCockroachDBSink.sh
+./createCockroachTransform.sh
 ssh -i ~/.ssh/<sshkey> CockroachDBlabs@<testernode public ip>
 ./saveTransaction.sh
 ```

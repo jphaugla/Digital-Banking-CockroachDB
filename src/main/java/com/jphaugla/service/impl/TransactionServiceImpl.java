@@ -63,7 +63,7 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.save(transaction);
     }
     private void writeTransactionKafka(Transaction randomTransaction) throws JsonProcessingException {
-        log.info("writeTransactionKafka started");
+       // log.info("writeTransactionKafka started");
         UUID key = UUID.randomUUID();
         //  must set the Id of the transaction
         randomTransaction.setId(key);

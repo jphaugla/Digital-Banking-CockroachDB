@@ -75,7 +75,7 @@ git clone https://github.com/jphaugla/CockroachDBearch-Digital-Banking.git
 docker-compose -f docker-compose-kafka.yml -f docker-compose.yml up -d
 cockroach sql --insecure 
 > create user jhaugland;
-> grant all on database defautldb to jhaugland;
+> grant all on database defaultdb to jhaugland;
 ```
 ## Deploying java application on local mac with Kafka non-application components
 * ensure maven and java are deployed on the local machine
@@ -87,7 +87,8 @@ cockroach sql --insecure
   * run the application.  Note it will fail because jhaugland username is not 
 ```bash
 source  scripts/setEnv.sh
-java -jar target/cockroachDB-0.0.1-SNAPSHOT.jar
+mvn clean package
+java -jar target/cockroach-0.0.1-SNAPSHOT.jar
 ```
 
 ## Using terraform on azure for all components
@@ -117,7 +118,7 @@ java -jar target/cockroachDB-0.0.1-SNAPSHOT.jar
 * get a second terminal window to the tester node and write a test message to kafka-this will cause the topic to be created.  Name can be changed in [application.properties](src/main/resources/application.properites) but default topic name is *transactions*
 ```bash
 ssh -i ~/.ssh/<sshkey> adminuser@<testernode public ip>
-cd Digital-Banking-CockroachDB/scripts
+cd Digital-Banking-CockroachDB/scripts/transaction
 # make sure saveTransaction script says doKafka=true
 ./saveTransaction.sh
 ```
@@ -133,18 +134,19 @@ cd Digital-Banking-CockroachDB/scripts
 #  Verify the CockroachDB.uri and CockroachDB.password.  (the CockroachDB.uri must be INTERNAL)
 ./createCockroachTransform.sh
 ssh -i ~/.ssh/<sshkey> CockroachDBlabs@<testernode public ip>
+cd transaction
 ./saveTransaction.sh
 ```
 verify data flowed in to CockroachDB using cockroach sql
 ```bash
 cockroach sql -h <CockroachDB_external_endpoint.txt> -p <CockroachDB_port.txt> -a CockroachDB123
->keys Trans*
+>select * from transaction;
 
 ```bash
 # on local mac
 cd Digital-Banking-CockroachDB/scripts
 #  change localhost to the public ip address for the kafka node in the last line.  
-# Set the contactPoints to the local IP address for the cassandra node. 
+# Set the contactPoints to the local IP address for the cockroach node. 
 
 ssh -i ~/.ssh/<sshkey> adminusers@<testernode public ip>
 ./transaction/saveTransaction.sh
@@ -152,7 +154,7 @@ ssh -i ~/.ssh/<sshkey> adminusers@<testernode public ip>
 ##  process larger record set
 verify generateData.sh says doKafkfa=true
 ```bash
-./scripts/transaction/generateData.sh
+./scripts/generateData.sh
 ```
 Will see large number of records now in CockroachDB
 

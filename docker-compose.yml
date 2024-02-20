@@ -6,8 +6,8 @@ services:
    hostname: crdb1
    ports:
      - "26257:26257"
-     - "18080:18080"
-   command: start-single-node --insecure --store=node1 
+     - "18080:8080"
+   command: start-single-node --insecure --store=cockroach-data/crdb1 
    volumes:
      - "${PWD}/cockroach-data/crdb1:/cockroach/cockroach-data"
      - "${PWD}/scripts:/scripts"

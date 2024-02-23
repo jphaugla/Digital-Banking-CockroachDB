@@ -20,6 +20,7 @@ CockroachDB banking data layer.  A CockroachDB docker configuration is included.
 ## Requirements
 * Docker installed on your local system, see [Docker Installation Instructions](https://docs.docker.com/engine/installation/).
 * Alternatively, can run CockroachDB Enterprise and set the CockroachDB host and port in the application.properties file
+  * [This terraform and ansible github](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module) can be used to deploy this application to AZURE
 * When using Docker for Mac or Docker for Windows, the default resources allocated to the linux VM running docker are 2GB RAM and 2 CPU's. Make sure to adjust these resources to meet the resource requirements for the containers you will be running. More information can be found here on adjusting the resources allocated to docker.
 * NOTE:  seemed very difficult to change the swagger ui port from 8080 so left application and swagger ui port at 8080
   * this conflicts with typcial port 8080 configuration of CockroachDB http port of 8080-must change out port 8080 
@@ -40,8 +41,8 @@ CockroachDB banking data layer.  A CockroachDB docker configuration is included.
 
 ## Technical Overview
 
-This github java code uses [Spring Data JPA](https://spring.io/projects/spring-data-jpa/) using the Java Persistence API repositories.  The jedis library supports RediSearch, CockroachDBJSON, and CockroachDBTimeSeries.  The original github only used spring java without CockroachDBearch.  That repository is still intact at [this github location](https://github.com/jphaugla/CockroachDB-Digital-Banking).  Another subsequent version uses crud repository and search at [this github location](https://github.com/jphaugla/CockroachDBearch-Digital-Banking)
-All of the Spring Java indexes have been removed in this version.  The crud repository has been removed. 
+This github java code uses [Spring Data JPA](https://spring.io/projects/spring-data-jpa/) using the Java Persistence API repositories.
+
 ### The spring java code
 This is basic spring links
 * [Spring CockroachDB](https://docs.spring.io/spring-data/data-CockroachDB/docs/current/reference/html/#CockroachDB.repositories.indexes) 
@@ -61,7 +62,8 @@ is deployed to the tomcat server.
 <a href="" rel="Tables Structures Used"><img src="images/Tables.png" alt="" /></a>
 
 ## Using Docker for non-application components
-This option uses docker to support all of the non-application components (kafka, CockroachDB) with the java application running on the local mac.
+This option uses docker to support all of the non-application components (kafka, CockroachDB) with the java application
+running on the local mac.
 * Prepare Docker environment-see the Prerequisites section above...
 * Pull this github into a directory
 ```bash
@@ -96,8 +98,9 @@ java -jar target/cockroach-0.0.1-SNAPSHOT.jar
 * Use [this github](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module)  to deploy all of the components (including the application)
 * Check the [readme](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/README.md) for the details on deploying this github including the cloning the github and working with Azure.  Completely deploy the terraform github for all deployments.  This will also deploy [this github](https://github.com/jphaugla/CockroachDBearch-Digital-Banking-CockroachDBTemplate) inside the tester node.  The later application deployment instructions will be deployed within the tester node using ssh
 * maven and java will be installed by the ansible jobs for the tester node
-* the ip information is shared in a [temp directory](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/provisioners/temp) within the terraform/ansible repository.  Go to the files here to see private (internal) and public (external) kafka node, cassandra node and testinnode IP addresses.  The CockroachDB internal and external database connection dns names are also available.  These dns names will also give an internal and external CockroachDB enterprise node IP.
-* log into the tester node using the testernode IP and the ssh key defined in test/main.tf and go to github home
+* the ip information is shared in a [temp directory](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/provisioners/temp) 
+within the terraform/ansible repository.  Go to the files here to see private (internal) and public (external) kafka node and test node IP addresses.  The CockroachDB internal and external database connection dns names are also available.  These dns names will also give an internal and external CockroachDB enterprise node IP.
+* log into the tester node using the tester node IP and the ssh key defined in test/main.tf and go to github home
 ```bash
 ssh -i <azure key> adminuser@<testerIP>
 cd Digital-Banking-CockroachDB

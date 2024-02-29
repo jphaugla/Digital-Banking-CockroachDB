@@ -1,7 +1,8 @@
-# if running on azure app-node set crdb host to the haproxy internal address
-export COCKROACH_URL="jdbc:postgresql://${COCKROACH_HOST}:${COCKROACH_PORT}/defaultdb?sslmode=verify-full&sslrootcert=../certs/ca.crt"
 export COCKROACH_HOST=localhost
 export COCKROACH_PORT=26257
+# if running on azure app-node set crdb host to the haproxy internal address
+# export COCKROACH_URL="jdbc:postgresql://${COCKROACH_HOST}:${COCKROACH_PORT}/defaultdb?sslmode=verify-full&sslrootcert=../certs/ca.crt"
+export COCKROACH_URL="jdbc:postgresql://${COCKROACH_HOST}:${COCKROACH_PORT}/defaultdb?sslmode=disable"
 export COCKROACH_DB_USER=jhaugland
 export USE_SSL=false
 # substitute in actual KAFKA_HOST internal IP

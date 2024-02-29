@@ -96,31 +96,38 @@ java -jar target/cockroach-0.0.1-SNAPSHOT.jar
 ## Using terraform on azure for all components
 <a href="" rel="Deployment"><img src="images/deployment.png" alt="" /></a>
 * Use [this github](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module)  to deploy all of the components (including the application)
-* Check the [readme](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/README.md) for the details on deploying this github including the cloning the github and working with Azure.  Completely deploy the terraform github for all deployments.  This will also deploy [this github](https://github.com/jphaugla/CockroachDBearch-Digital-Banking-CockroachDBTemplate) inside the tester node.  The later application deployment instructions will be deployed within the tester node using ssh
-* maven and java will be installed by the ansible jobs for the tester node
-* the ip information is shared in a [temp directory](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/provisioners/temp) 
+* Check the [readme](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/README.md) for the details on deploying this github including the cloning the github and working with Azure.  Completely deploy the terraform github for all deployments.  This will also deploy [this github](https://github.com/jphaugla/CockroachDBearch-Digital-Banking-CockroachDBTemplate) inside the app node.  The later application deployment instructions will be deployed within the app node using ssh
+* maven and java will be installed by the ansible jobs for the app node
+* the ip information is shared in a subdirectory for the region under [temp directory](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/provisioners/temp) 
 within the terraform/ansible repository.  Go to the files here to see private (internal) and public (external) kafka node and test node IP addresses.  The CockroachDB internal and external database connection dns names are also available.  These dns names will also give an internal and external CockroachDB enterprise node IP.
-* log into the tester node using the tester node IP and the ssh key defined in test/main.tf and go to github home
+* log into the app node using the app node IP and the ssh key defined in test/main.tf and go to github home
 ```bash
-ssh -i <azure key> adminuser@<testerIP>
+ssh -i <azure key> adminuser@<appIP>
 cd Digital-Banking-CockroachDB
 ```
 * edit the [environment file](scripts/setEnv.sh)  using only the internal connection addresses.  NOTE: kafka will only connect from local azure IP addresses and not any public IP addresses.  Using public and private Kafka addresses is possible but not configured currently
-* These steps can all be done from client machine local browser using the kafka node public IP address and port 9021.  [http://172.172.133.201:9021/](http://172.172.133.201:9021/) From this home screen, pause the currently running connectors:  datagen-pageviews, cassanddra-sink, and CockroachDB-sink-json  using the Kafka Control Center.   This will just remove the noise of a second application running.  
-* Consider cleaning  the CockroachDB (drop the pageviews table)
-* CockroachDB tables will be created automatically by Spring Data JPA
-* start the application after logging in to the testernode
+* These steps can all be done from client machine local browser using the kafka node public IP address and port 9021.  [http://172.172.133.201:9021/](http://172.172.133.201:9021/) From this home screen, pause the currently running connectors:  datagen-transactions and cockroach-sink-json using the Kafka Control Center.   This will just remove the noise of a second application running.  
+* Also drop the cockroachDB transaction table
 ```bash
-ssh -i ~/.ssh/<sshkey> adminuser@<testernode public ip>
+# connect to the app node
+ssh -i ~/.ssh/<sshkey> adminuser@<appnode public ip>
+# connect to cockroach using private address for the haproxy 
+cockroach-sql --host=192.168.3.102 --certs-dir=certs --user jhaugland
+>drop table transaction;
+```
+* CockroachDB tables will be created automatically by Spring Data JPA
+* start the application after logging in to the appnode
+```bash
+ssh -i ~/.ssh/<sshkey> adminuser@<appnode public ip>
 cd Digital-Banking-CockroachDB
 mvn clean package
 # edit scripts/setEnv.sh for current nodes - CockroachDB_HOST, CockroachDB_PORT, and KAFKA_HOST must all change to match current environment.  *IMPORTANT* only use private/internal IP addresses-DO NOT USE *localhost*.  Additional note, CockroachDB password is different in local docker version and in ansible created version-verify CockroachDB password!
 source scripts/setEnv.sh
 java -jar target/cockroachDB-0.0.1-SNAPSHOT.jar
 ```
-* get a second terminal window to the tester node and write a test message to kafka-this will cause the topic to be created.  Name can be changed in [application.properties](src/main/resources/application.properites) but default topic name is *transactions*
+* get a second terminal window to the app node and write a test message to kafka-this will cause the topic to be created.  Name can be changed in [application.properties](src/main/resources/application.properites) but default topic name is *transactions*
 ```bash
-ssh -i ~/.ssh/<sshkey> adminuser@<testernode public ip>
+ssh -i ~/.ssh/<sshkey> adminuser@<appnode public ip>
 cd Digital-Banking-CockroachDB/scripts/transaction
 # make sure saveTransaction script says doKafka=true
 ./saveTransaction.sh
@@ -134,15 +141,19 @@ cd Digital-Banking-CockroachDB/scripts/transaction
 cd Digital-Banking-CockroachDB/scripts
 #  change localhost to the external/public ip address for the kafka node in the last line. 
 #  Make sure this is the public kafka IP and not the private  
-#  Verify the CockroachDB.uri and CockroachDB.password.  (the CockroachDB.uri must be INTERNAL)
-./createCockroachTransform.sh
-ssh -i ~/.ssh/<sshkey> CockroachDBlabs@<testernode public ip>
+#  Verify the CockroachDB.uri and CockroachDB.password.  (the CockroachDB.uri must be INTERNAL haproxy IP)
+./createCockroachTransformApp.sh
+ssh -i ~/.ssh/<sshkey> CockroachDBlabs@<appnode public ip>
 cd transaction
 ./saveTransaction.sh
 ```
-verify data flowed in to CockroachDB using cockroach sql
+verify data flowed in to CockroachDB back on the application node
 ```bash
-cockroach sql -h <CockroachDB_external_endpoint.txt> -p <CockroachDB_port.txt> -a CockroachDB123
+# connect to the app node
+ssh -i ~/.ssh/<sshkey> adminuser@<appnode public ip>
+# connect to cockroach using private address for the haproxy 
+#  must be in /home/adminuser to use the certs dir
+cockroach-sql --host=192.168.3.102 --certs-dir=certs --user jhaugland
 >select * from transaction;
 
 ```bash
@@ -151,7 +162,7 @@ cd Digital-Banking-CockroachDB/scripts
 #  change localhost to the public ip address for the kafka node in the last line.  
 # Set the contactPoints to the local IP address for the cockroach node. 
 
-ssh -i ~/.ssh/<sshkey> adminusers@<testernode public ip>
+ssh -i ~/.ssh/<sshkey> adminusers@<appnode public ip>
 ./transaction/saveTransaction.sh
 ```
 ##  process larger record set

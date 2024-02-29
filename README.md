@@ -92,7 +92,17 @@ source  scripts/setEnv.sh
 mvn clean package
 java -jar target/cockroach-0.0.1-SNAPSHOT.jar
 ```
-
+Add the jdbc sink to get data into cockroachDB from kafka
+```bash
+cd Digital-Banking-CockroachDB/scripts
+#  change localhost to the external/public ip address for the kafka node in the last line. 
+#  Make sure this is the public kafka IP and not the private  
+#  Verify the CockroachDB.uri and CockroachDB.password.  (the CockroachDB.uri must be INTERNAL haproxy IP)
+./createCockroachTransform.sh
+ssh -i ~/.ssh/<sshkey> CockroachDBlabs@<appnode public ip>
+cd transaction
+./saveTransaction.sh
+```
 ## Using terraform on azure for all components
 <a href="" rel="Deployment"><img src="images/deployment.png" alt="" /></a>
 * Use [this github](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module)  to deploy all of the components (including the application)
@@ -105,6 +115,7 @@ within the terraform/ansible repository.  Go to the files here to see private (i
 ssh -i <azure key> adminuser@<appIP>
 cd Digital-Banking-CockroachDB
 ```
+
 * edit the [environment file](scripts/setEnv.sh)  using only the internal connection addresses.  NOTE: kafka will only connect from local azure IP addresses and not any public IP addresses.  Using public and private Kafka addresses is possible but not configured currently
 * These steps can all be done from client machine local browser using the kafka node public IP address and port 9021.  [http://172.172.133.201:9021/](http://172.172.133.201:9021/) From this home screen, pause the currently running connectors:  datagen-transactions and cockroach-sink-json using the Kafka Control Center.   This will just remove the noise of a second application running.  
 * Also drop the cockroachDB transaction table

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import jakarta.persistence.*;
 
+import java.sql.Timestamp;
 import java.util.UUID;
 
 @Entity
@@ -18,4 +19,6 @@ public abstract class BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     @JsonFormat(shape=JsonFormat.Shape.STRING)
     private UUID id;
+    private String _source;
+    private Timestamp _timestamp;
 }

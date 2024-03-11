@@ -6,7 +6,7 @@ information.  As seen below, this data is useful for a variety of business purpo
 <a href="" rel="Digital Banking"><img src="images/DigitalBanking.png" alt="" /></a>
 
 ## Overview
-In this tutorial, a java spring boot application is run through a jar file to support typical API calls to a 
+In this github, a java spring boot application is run through a jar file to support typical API calls to a 
 CockroachDB banking data layer.  A CockroachDB docker configuration is included.
 
 ## CockroachDB Advantages for Digital Banking
@@ -108,6 +108,7 @@ cd transaction
 * Use [this github](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module)  to deploy all of the components (including the application)
 * Check the [readme](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/README.md) for the details on deploying this github including the cloning the github and working with Azure.  Completely deploy the terraform github for all deployments.  This will also deploy [this github](https://github.com/jphaugla/CockroachDBearch-Digital-Banking-CockroachDBTemplate) inside the app node.  The later application deployment instructions will be deployed within the app node using ssh
 * maven and java will be installed by the ansible jobs for the app node
+* cockraochdb cdc-sink can be used with this github for 2 DC cockroach deployments
 * the ip information is shared in a subdirectory for the region under [temp directory](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/provisioners/temp) 
 within the terraform/ansible repository.  Go to the files here to see private (internal) and public (external) kafka node and test node IP addresses.  The CockroachDB internal and external database connection dns names are also available.  These dns names will also give an internal and external CockroachDB enterprise node IP.
 * log into the app node using the app node IP and the ssh key defined in test/main.tf and go to github home
@@ -188,7 +189,8 @@ Will see large number of records now in CockroachDB
 #### Use swagger UI
 * [open api docs](http://localhost:8080/v3/api-docs)
 * [use swagger ui](http://localhost:8080/swagger-ui/index.html)
-#### run bash scripts in ./scripts.  Adding the CockroachDBearch queries behind each script here also...
+
+#### run bash scripts in ./scripts.  Adding the CockroachDB search queries behind each script here also...
   * addTag.sh - add a tag to a transaction.  Tags allow user to mark  transactions to be in a buckets such as Travel or Food for budgetary tracking purposes
   * deleteCustomer.sh - delete all customers matching a string
   * generateData.sh - simple API to generate default customer, accounts, merchants, phone numbers, emails and transactions
@@ -219,3 +221,24 @@ Will see large number of records now in CockroachDB
   * disputeAccept.sh - accept the dispute
   * disputeResolved.sh - charge back the dispute
 
+## Deploying Digital Banking CockroachDB to 2 regions with cdc-sink
+* Use the terraform/ansible deployment using the subdirectories [region1](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/region1) and [region2](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/region2) in the deployment github
+* Can disable deployment of Kafka using the *include_ha_proxy* flag in [deploy main.tf](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/region1/main.tf)
+* Ensure *install_cdc_sink* flag and *create_cdc_sink* flag are set to true in [deploy main.tf](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/provisioners/roles/app-node/vars/main.yml)
+* Ensure *install_enterprise_keys* is set in both [region1](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/region1) and [region2](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/region2)
+* Run terraform apply in each region directory
+```bash
+export TF_VAR_cluster_organization={CLUSTER ORG}
+export TF_VAR_enterprise_license={LICENSE}
+git clone https://github.com/nollenr/AZURE-Terraform-CRDB-Module.git
+cd AZURE-Terraform-CRDB-Module/region1
+terraform init
+terraform apply
+cd AZURE-Terraform-CRDB-Module/region2
+terraform init
+terraform apply
+```
+* This will deploy this Digital-Banking-CockroachDB github into the application node with connectivity to cockroachDB.  Additionally, cdc-sink is deployed and running on the application node also with connectivity to haproxy and cockroachDB in the same region
+* The necessary manual step is to deploy a changefeed across the regions to make active/active cdc-sink between the two otherwise independent regions
+  * Port 30004 is open on both regions to allow the changefeed to communicate with the application server on the other region
+* 

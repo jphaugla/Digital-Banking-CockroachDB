@@ -13,13 +13,15 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public interface TransactionService {
+    void generateData(Integer noOfCustomers, Integer noOfTransactions, Integer noOfDays, String keySuffix, Boolean doKafka)
+            throws ExecutionException, JsonProcessingException;
+
     Transaction saveTransaction (Transaction  transaction ) throws JsonProcessingException;
     Transaction  getTransactionById(UUID id) throws NotFoundException;
     void deleteTransaction(UUID id) throws NotFoundException;
 
     UUID saveSampleTransaction(UUID accountId, Boolean doKafka) throws ParseException, JsonProcessingException;
 
-    void generateData(Integer noOfCustomers, Integer noOfTransactions, Integer noOfDays, String keySuffix, Boolean doKafka) throws ExecutionException, JsonProcessingException;
 
     List<Transaction> getMerchantCategoryTransactions(String merchantCategory, UUID account, Date startDate, Date endDate) throws NotFoundException;
 
@@ -42,4 +44,6 @@ public interface TransactionService {
     List<Transaction> getTransactionsByStatus(String statusToChange, Integer numberOfTransactions);
 
     List<String> deleteTag(UUID uuid, String tag) throws NotFoundException, JsonProcessingException;
+
+    void writeTransactionKafka(Transaction randomTransaction) throws JsonProcessingException;
 }

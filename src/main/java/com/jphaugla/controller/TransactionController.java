@@ -61,13 +61,6 @@ public class TransactionController {
 		Transaction transaction = transactionService.getTransactionById(toUUID(transactionId, ERR_INVALID_TRANSACTION));
 		return ResponseEntity.ok(transaction);
 	}
-	/*
-	//  test send message
-	@GetMapping (value = "/send")
-	public void send() throws ExecutionException, InterruptedException {
-		topicProducer.send("Mensagem de teste enviada ao tópico", "mensagem");
-	}
-	*/
 
 	@GetMapping("/generateData")
 	public ResponseEntity<String> generateData (@RequestParam Integer noOfCustomers, @RequestParam Integer noOfTransactions,

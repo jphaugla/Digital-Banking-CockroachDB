@@ -20,6 +20,4 @@ public interface CustomerService {
     List<Customer> getCustomerByStateCity(String state, String city) throws NotFoundException;
 
     List<Customer> getCustomerByZipLast(String zipcode, String lastname) throws NotFoundException;
-
-    List<Account> createCustomerAccount(int noOfCustomers, String key_suffix) throws ExecutionException;
 }

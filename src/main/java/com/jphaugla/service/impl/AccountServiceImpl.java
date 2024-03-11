@@ -10,6 +10,7 @@ import com.jphaugla.service.AccountService;
 import com.jphaugla.util.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -30,6 +31,8 @@ public class AccountServiceImpl implements AccountService {
     private EmailRepository emailRepository;
     @Autowired
     private PhoneRepository phoneRepository;
+    @Value("${app.region}")
+    private String source_region;
 
     public AccountServiceImpl(AccountRepository accountRepository) {
         super();
@@ -39,6 +42,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Account saveAccount(Account account) {
         log.info("accountService.saveAccount");
+        account.setCurrentTime(source_region);
         return accountRepository.save(account);
     }
 

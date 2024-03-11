@@ -6,6 +6,7 @@ import com.jphaugla.repository.TransactionReturnRepository;
 import com.jphaugla.service.TransactionReturnService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,7 +20,8 @@ public class TransactionReturnServiceImpl implements TransactionReturnService {
  
     @Autowired
     private TransactionReturnRepository transactionReturnRepository;
-
+    @Value("${app.region}")
+    private String source_region;
 
     public TransactionReturnServiceImpl(TransactionReturnRepository transactionReturnRepository) {
         super();
@@ -29,6 +31,7 @@ public class TransactionReturnServiceImpl implements TransactionReturnService {
     @Override
     public TransactionReturn saveTransactionReturn(TransactionReturn transactionReturn) {
         log.info("transactionReturnService.saveTransactionReturn");
+        transactionReturn.setCurrentTime(source_region);
         return transactionReturnRepository.save(transactionReturn);
     }
 

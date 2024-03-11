@@ -14,11 +14,16 @@ import java.util.UUID;
 //@Inheritance(strategy=InheritanceType.JOINED)
 //@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
+
 public abstract class BaseEntity {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @JsonFormat(shape=JsonFormat.Shape.STRING)
     private UUID id;
-    private String _source;
     private Timestamp _timestamp;
+    private String _source;
+    public UUID generateSetID() {
+        id = UUID.randomUUID();
+        return id;
+    }
 }

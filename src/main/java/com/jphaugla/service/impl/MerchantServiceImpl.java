@@ -6,6 +6,7 @@ import com.jphaugla.repository.MerchantRepository;
 import com.jphaugla.service.MerchantService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,7 +20,8 @@ public class MerchantServiceImpl implements MerchantService {
  
     @Autowired
     private MerchantRepository merchantRepository;
-
+    @Value("${app.region}")
+    private String source_region;
 
     public MerchantServiceImpl(MerchantRepository merchantRepository) {
         super();
@@ -29,6 +31,7 @@ public class MerchantServiceImpl implements MerchantService {
     @Override
     public String saveMerchant(Merchant merchant) {
         log.info("merchantService.saveMerchant");
+        merchant.setCurrentTime(source_region);
         merchantRepository.save(merchant);
         return merchant.getName();
     }

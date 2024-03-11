@@ -7,6 +7,7 @@ import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Type;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -51,5 +52,12 @@ public class Transaction extends BaseEntity{
             columnDefinition = "text[]"
     )
     private List<String> transactionTags;
-
+    public void setCurrentTime (String in_source) {
+        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+        set_timestamp(currentTimestamp);
+        set_source(in_source);
+        if (getId() == null) {
+            generateSetID();
+        }
+    }
 }

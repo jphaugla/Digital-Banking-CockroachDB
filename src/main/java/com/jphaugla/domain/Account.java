@@ -2,6 +2,7 @@ package com.jphaugla.domain;
 
 import lombok.*;
 import jakarta.persistence.*;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -25,11 +26,16 @@ public class Account extends BaseEntity{
     private String lastUpdatedBy;
     private String createdBy;
     private Timestamp createdDatetime;
-	public void setCurrentTime () {
+	public void setCurrentTime (String region) {
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+        set_source(region);
         setCreatedDatetime(currentTimestamp);
         setOpenDatetime(currentTimestamp);
         setLastUpdated(currentTimestamp);
+        set_timestamp(currentTimestamp);
+        if (getId() == null) {
+            generateSetID();
+        }
     }
 }
 

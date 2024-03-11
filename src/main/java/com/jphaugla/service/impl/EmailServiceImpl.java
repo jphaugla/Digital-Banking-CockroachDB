@@ -26,6 +26,8 @@ public class EmailServiceImpl implements EmailService {
     private TopicProducerSchema topicProducerSchema;
     @Value("${topic.name.email}")
     private String emailTopic;
+    @Value("${app.region}")
+    private String source_region;
 
 
     public EmailServiceImpl(EmailRepository emailRepository) {
@@ -36,12 +38,14 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public Email saveEmail(Email email) {
         log.info("emailService.saveEmail");
+        email.setCurrentTime(source_region);
         return emailRepository.save(email);
     }
 
     @Override
     public Email saveEmailKafka(Email email) throws JsonProcessingException {
         log.info("emailService.saveEmail");
+        email.setCurrentTime(source_region);
         topicProducerSchema.send(emailTopic, email.getAddress(), email);
         return email;
     }

@@ -11,6 +11,7 @@ import com.jphaugla.service.DisputeService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -28,6 +29,8 @@ public class DisputeServiceImpl implements DisputeService {
     private DisputeRepository disputeRepository;
     @Autowired
     private TransactionRepository transactionRepository;
+    @Value("${app.region}")
+    private static String source_region;
 
 
     public DisputeServiceImpl(DisputeRepository disputeRepository) {
@@ -38,7 +41,7 @@ public class DisputeServiceImpl implements DisputeService {
     @Override
     public UUID saveDispute(Dispute dispute) {
         log.info("disputeService.savedispute");
-        dispute.setCurrentTime();
+        dispute.setCurrentTime(source_region);
         disputeRepository.save(dispute);
         return dispute.getId();
     }
@@ -90,7 +93,7 @@ public class DisputeServiceImpl implements DisputeService {
         //  incoming is only a date and not a timestamp, change to a timestamp
 
         // dispute.setFilingDate(filingDateTime);
-        dispute.setCurrentTime();
+        dispute.setCurrentTime(source_region);
         Transaction transaction = transactionRepository.findById(dispute.getTranId()).orElseThrow(() ->
                 new NotFoundException (String.format(ERR_TRANSACTION_NOT_FOUND, dispute.getTranId())));
         dispute.setChargeBackAmount(transaction.getAmount());

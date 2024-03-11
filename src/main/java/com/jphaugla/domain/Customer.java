@@ -2,6 +2,7 @@ package com.jphaugla.domain;
 
 import lombok.*;
 import jakarta.persistence.*;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -33,8 +34,6 @@ public class Customer extends BaseEntity{
     private  String firstName;
     private  String fullName;
     private  String gender;
-    private  String governmentId;
-    private  String governmentIdType;
     private  String lastName;
     private  Timestamp lastUpdated;
     private  String lastUpdatedBy;
@@ -46,10 +45,15 @@ public class Customer extends BaseEntity{
     private  String zipcode4;
 
 
-   public void setCurrentTime () {
+   public void setCurrentTime (String in_source) {
        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
        setCreatedDatetime(currentTimestamp);
        setLastUpdated(currentTimestamp);
+       set_timestamp(currentTimestamp);
+       set_source(in_source);
+       if (getId() == null) {
+           generateSetID();
+       }
    }
 
 }

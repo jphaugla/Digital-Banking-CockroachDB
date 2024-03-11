@@ -8,8 +8,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-
-import com.jphaugla.data.BankGenerator;
 import com.jphaugla.domain.Account;
 import com.jphaugla.domain.Customer;
 import com.jphaugla.domain.Email;
@@ -21,8 +19,10 @@ import com.jphaugla.repository.CustomerRepository;
 import com.jphaugla.repository.EmailRepository;
 import com.jphaugla.repository.PhoneRepository;
 import com.jphaugla.service.CustomerService;
+import com.jphaugla.service.DataGeneratorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import static com.jphaugla.util.Constants.*;
@@ -38,6 +38,10 @@ public class CustomerServiceImpl implements CustomerService {
     private EmailRepository emailRepository;
     @Autowired
     private PhoneRepository phoneRepository;
+    @Autowired
+    private DataGeneratorService dataGeneratorService;
+    @Value("${app.region}")
+    private static String source_region;
 
     public CustomerServiceImpl(CustomerRepository customerRepository) {
         super();
@@ -47,6 +51,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Customer saveCustomer(Customer customer) {
         log.info("customerService.saveCustomer");
+        customer.setCurrentTime(source_region);
         return customerRepository.save(customer);
     }
 
@@ -103,17 +108,16 @@ public class CustomerServiceImpl implements CustomerService {
                 "Home", "N", "Minneapolis", "00",
                 "jph", create_timestamp, "IDR",
                 "A", "BANK", "1949.01.23",
-                "Ralph", "Ralph Waldo Emerson", "M",
-                "887778989", "SSN", "Emerson",
+                "Ralph", "Ralph Waldo Emerson", "M", "Emerson",
                 last_update_timestamp, "jph", "Waldo", "MR",
                 "help", "MN", "55444", "55444-3322"
         );
         log.info("Customer Saved");
         customerRepository.save(customer);
         UUID cust = customer.getId();
-        Email home_email = new Email("jasonhaugland@gmail.com", "home", cust);
-        Email work_email = new Email("jhaugland@cockroachlabs.com", "work", cust);
-        Phone cell_phone = new Phone("612-408-4394", "cell", cust);
+        Email home_email = new Email("jasonhaugland@gmail.com", "home", cust, source_region);
+        Email work_email = new Email("jhaugland@cockroachlabs.com", "work", cust,source_region);
+        Phone cell_phone = new Phone("612-408-4394", "cell", cust, source_region);
         emailRepository.save(home_email);
         emailRepository.save(work_email);
         log.info("Email saved");
@@ -134,48 +138,5 @@ public class CustomerServiceImpl implements CustomerService {
                 new NotFoundException(String.format(ERR_CUSTOMER_NOT_FOUND_2, "Zip:" + zipcode + " City: " + lastname)));
     }
 
-    @Override
-    public List<Account> createCustomerAccount(int noOfCustomers, String key_suffix) throws ExecutionException {
-
-        log.info("Creating " + noOfCustomers + " customers with accounts and suffix " + key_suffix);
-        BankGenerator.Timer custTimer = new BankGenerator.Timer();
-        List<Account> accounts = null;
-        List<Account> allAccounts = new ArrayList<>();
-        List<Email> emails = null;
-        List<Phone> phoneNumbers = null;
-        int totalAccounts = 0;
-        int totalEmails = 0;
-        int totalPhone = 0;
-        log.info("before the big for loop");
-        for (int i = 0; i < noOfCustomers; i++) {
-            // log.info("int noOfCustomer for loop i=" + i);
-            Customer customer = BankGenerator.createRandomCustomer(key_suffix);
-            List<Email> emailList = BankGenerator.createEmail(customer.getId());
-            List<Phone> phoneList = BankGenerator.createPhone(customer.getId());
-            for (Phone phoneNumber : phoneNumbers = phoneList) {
-                phoneRepository.save(phoneNumber);
-            }
-            totalPhone = totalPhone + phoneNumbers.size();
-            for (Email email : emails = emailList) {
-                emailRepository.save(email);
-            }
-            totalEmails = totalEmails + emails.size();
-            accounts = BankGenerator.createRandomAccountsForCustomer(customer, key_suffix);
-            totalAccounts = totalAccounts + accounts.size();
-            for (Account account : accounts) {
-                accountRepository.save(account);
-            }
-            customerRepository.save(customer);
-            if (!accounts.isEmpty()) {
-                allAccounts.addAll(accounts);
-            }
-        }
-
-        custTimer.end();
-        log.info("Customers=" + noOfCustomers + " Accounts=" + totalAccounts +
-                " Emails=" + totalEmails + " Phones=" + totalPhone + " in " +
-                custTimer.getTimeTakenSeconds() + " secs");
-        return allAccounts;
-    }
 
 }

@@ -2,7 +2,6 @@ package com.jphaugla.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jphaugla.data.BankGenerator;
 import com.jphaugla.domain.Account;
 import com.jphaugla.domain.Merchant;
 import com.jphaugla.domain.Transaction;
@@ -14,10 +13,10 @@ import com.jphaugla.repository.TransactionRepository;
 import com.jphaugla.repository.TransactionReturnRepository;
 import com.jphaugla.repository.TransactionStatusInterface;
 import com.jphaugla.service.CustomerService;
+import com.jphaugla.service.DataGeneratorService;
 import com.jphaugla.service.TopicProducerSchema;
 import com.jphaugla.service.TransactionService;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
@@ -37,12 +36,16 @@ public class TransactionServiceImpl implements TransactionService {
  
     @Autowired
     private TransactionRepository transactionRepository;
+    @Value("${app.region}")
+    private String source_region;
     @Autowired
     private MerchantRepository merchantRepository;
     @Autowired
     private TransactionReturnRepository transactionReturnRepository;
     @Autowired
     CustomerService customerService;
+    @Autowired
+    DataGeneratorService dataGeneratorService;
     @Autowired
     private TopicProducerSchema topicProducerSchema;
     @Autowired
@@ -54,19 +57,60 @@ public class TransactionServiceImpl implements TransactionService {
         super();
         this.transactionRepository = transactionRepository;
     }
+    @Override
+    public void generateData(Integer noOfCustomers, Integer noOfTransactions, Integer noOfDays, String keySuffix, Boolean doKafka)
+            throws ExecutionException, JsonProcessingException {
 
+        List<Account> accounts = dataGeneratorService.createCustomerAccount(noOfCustomers, keySuffix);
+        log.info("after accounts");
+        // date = new DateTime().minusDays(noOfDays).withTimeAtStartOfDay();
+        DataGeneratorServiceImpl.Timer transTimer = new DataGeneratorServiceImpl.Timer();
+
+        int totalTransactions = noOfTransactions * noOfDays;
+
+        log.info("Writing " + totalTransactions + " transactions for " + noOfCustomers
+                + " customers. suffix is " + keySuffix);
+        int account_size = accounts.size();
+        int transactionsPerAccount = noOfDays * noOfTransactions / account_size;
+        log.info("number of accounts generated is " + account_size + " transactionsPerAccount "
+                + transactionsPerAccount);
+        List<Merchant> merchants = dataGeneratorService.createMerchantList();
+        List<TransactionReturn> transactionReturns = dataGeneratorService.createTransactionReturnList();
+        merchantRepository.saveAll(merchants);
+        log.info("completed merchant next is transactionReturn");
+        transactionReturnRepository.saveAll(transactionReturns);
+        int transactionIndex = 0;
+        List<Transaction> transactionList = new ArrayList<>();
+        for (Account account : accounts) {
+            log.info("writing account " + account.getAccountNo());
+            for (int i = 0; i < transactionsPerAccount; i++) {
+                transactionIndex++;
+                Transaction randomTransaction = dataGeneratorService.createRandomTransaction(noOfDays, transactionIndex, account, keySuffix,
+                        merchants, transactionReturns);
+                if (doKafka)
+                    writeTransactionKafka(randomTransaction);
+                else
+                    saveTransaction(randomTransaction);
+            }
+        }
+        transTimer.end();
+        log.info("Finished writing " + totalTransactions + " created in " +
+                transTimer.getTimeTakenSeconds() + " seconds.");
+    }
     @Override
     public Transaction saveTransaction(Transaction transaction) throws JsonProcessingException {
         log.info("transactionService.saveTransaction");
+        transaction.setCurrentTime(source_region);
         String jsonStr = objectMapper.writeValueAsString(transaction);
         log.info("object contents: " + jsonStr);
         return transactionRepository.save(transaction);
     }
-    private void writeTransactionKafka(Transaction randomTransaction) throws JsonProcessingException {
+    public void writeTransactionKafka(Transaction randomTransaction) throws JsonProcessingException {
        // log.info("writeTransactionKafka started");
-        UUID key = UUID.randomUUID();
+       //  UUID key = UUID.randomUUID();
         //  must set the Id of the transaction
-        randomTransaction.setId(key);
+        randomTransaction.setCurrentTime(source_region);
+        UUID key=randomTransaction.getId();
         topicProducerSchema.send(transactionTopic, key.toString(), randomTransaction);
 
     }
@@ -103,7 +147,7 @@ public class TransactionServiceImpl implements TransactionService {
         Date init_date = new SimpleDateFormat("yyyy/MM/dd").parse("2021/07/27");
         Timestamp init_timestamp = new Timestamp((init_date.getTime()));
         Merchant merchant = new Merchant("Cub Foods", "5411",
-                "Grocery Stores", "MN", "US");
+                "Grocery Stores", "MN", "US", source_region);
         log.info("before save merchant");
         merchantRepository.save(merchant);
         List<String> tags = Arrays.asList("Groceries","Necesity");
@@ -126,45 +170,6 @@ public class TransactionServiceImpl implements TransactionService {
         return transaction.getId();
     }
 
-    @Override
-    public void generateData(Integer noOfCustomers, Integer noOfTransactions, Integer noOfDays, String keySuffix, Boolean doKafka) throws ExecutionException, JsonProcessingException {
-
-        List<Account> accounts = customerService.createCustomerAccount(noOfCustomers, keySuffix);
-        log.info("after accounts");
-        BankGenerator.date = new DateTime().minusDays(noOfDays).withTimeAtStartOfDay();
-        BankGenerator.Timer transTimer = new BankGenerator.Timer();
-
-        int totalTransactions = noOfTransactions * noOfDays;
-
-        log.info("Writing " + totalTransactions + " transactions for " + noOfCustomers
-                + " customers. suffix is " + keySuffix);
-        int account_size = accounts.size();
-        int transactionsPerAccount = noOfDays * noOfTransactions / account_size;
-        log.info("number of accounts generated is " + account_size + " transactionsPerAccount "
-                + transactionsPerAccount);
-        List<Merchant> merchants = BankGenerator.createMerchantList();
-        List<TransactionReturn> transactionReturns = BankGenerator.createTransactionReturnList();
-        merchantRepository.saveAll(merchants);
-        log.info("completed merchant next is transactionReturn");
-        transactionReturnRepository.saveAll(transactionReturns);
-        int transactionIndex = 0;
-        List<Transaction> transactionList = new ArrayList<>();
-        for (Account account : accounts) {
-            log.info("writing account " + account.getAccountNo());
-            for (int i = 0; i < transactionsPerAccount; i++) {
-                transactionIndex++;
-                Transaction randomTransaction = BankGenerator.createRandomTransaction(noOfDays, transactionIndex, account, keySuffix,
-                        merchants, transactionReturns);
-                if (doKafka)
-                    writeTransactionKafka(randomTransaction);
-                else
-                    saveTransaction(randomTransaction);
-            }
-        }
-        transTimer.end();
-        log.info("Finished writing " + totalTransactions + " created in " +
-                transTimer.getTimeTakenSeconds() + " seconds.");
-    }
 
     @Override
     public List<Transaction> getMerchantCategoryTransactions(String merchantCategory, UUID account, Date startDate, Date endDate) throws NotFoundException {

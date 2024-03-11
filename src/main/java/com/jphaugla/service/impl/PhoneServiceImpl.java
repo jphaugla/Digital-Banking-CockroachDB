@@ -6,6 +6,7 @@ import com.jphaugla.repository.PhoneRepository;
 import com.jphaugla.service.PhoneService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +21,8 @@ public class PhoneServiceImpl implements PhoneService {
  
     @Autowired
     private PhoneRepository phoneRepository;
-
+    @Value("${app.region}")
+    private String source_region;
 
     public PhoneServiceImpl(PhoneRepository phoneRepository) {
         super();
@@ -30,6 +32,7 @@ public class PhoneServiceImpl implements PhoneService {
     @Override
     public Phone savePhone(Phone phone) {
         log.info("phoneService.savePhone");
+        phone.setCurrentTime(source_region);
         return phoneRepository.save(phone);
     }
 

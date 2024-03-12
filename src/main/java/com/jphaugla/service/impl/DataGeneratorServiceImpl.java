@@ -43,7 +43,8 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
 
     Faker usFaker = new Faker(new Locale("en-US"));
 
-    private static final int DAY_MILLIS = 1000 * 60 *60 * 24;
+    private static final int HOUR_MILLIS = 1000*60*60;
+    private static final int DAY_MILLIS = HOUR_MILLIS * 24;
     private static AtomicInteger accountNoGenerator = new AtomicInteger(1);
     private static List<String> accountTypes = Arrays.asList("Current", "Joint Current", "Saving", "Mortgage",
             "E-Saving", "Deposit");
@@ -52,8 +53,10 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
     @Override
     public List<Email> createEmail(Customer customer) {
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
-        Email home_email = new Email(customer.getFirstName() + "." + customer.getLastName() + "@gmail.com","home", customer.getId(), source_region);
-        Email work_email = new Email(customer.getFirstName() + "." + customer.getLastName() + "@BigCompany.com","work", customer.getId(), source_region);
+        Email home_email = new Email(customer.getFirstName() + "." + customer.getLastName() +
+                "@gmail.com","home", customer.getId(), source_region);
+        Email work_email = new Email(customer.getFirstName() + "." + customer.getLastName() +
+                "@BigCompany.com","work", customer.getId(), source_region);
         List<Email> emailList;
         emailList = new ArrayList<Email>();
         emailList.add(home_email);
@@ -201,14 +204,18 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
         int randomLocation = (int) v;
 
         Long currentMillis = System.currentTimeMillis();
-        Long minMillis = currentMillis - ((long) noOfDays *DAY_MILLIS);
+        //  gets random time between current time and requested number of days ago
         Long millisRandom = Long.valueOf(usFaker.random().nextInt(0,noOfDays *DAY_MILLIS));
-        //  this is one hour  1000 * 60 * 60
         //  old data is really null date but can't use null
         Timestamp timestamp_old_data = new Timestamp(0);
-        Timestamp timestamp_current = new Timestamp(System.currentTimeMillis()-millisRandom);
-        Timestamp timestamp_minus_one = new Timestamp(currentMillis-millisRandom-usFaker.random().nextInt(1000*60*60, 1000*24*60*60));
-        Timestamp timestamp_minus_two = new Timestamp(currentMillis-millisRandom-usFaker.random().nextInt(1000*24*60*60, 1000*48*60*60));
+        // current timestamp is really already offset by a random number of time in the past based on requested number of days
+        Timestamp timestamp_current = new Timestamp(currentMillis-millisRandom);
+        //  random time between one day prior to timestamp_current and timestamp_current minus one hour
+        Timestamp timestamp_minus_one = new Timestamp(currentMillis-millisRandom-
+                usFaker.random().nextInt(HOUR_MILLIS, DAY_MILLIS));
+        //  two days prior to timestamp_current
+        Timestamp timestamp_minus_two = new Timestamp(currentMillis-millisRandom-
+                usFaker.random().nextInt(DAY_MILLIS + HOUR_MILLIS, DAY_MILLIS * 2));
 
         Transaction transaction = new Transaction();
         createItemsAndAmount(noOfItems, transaction);

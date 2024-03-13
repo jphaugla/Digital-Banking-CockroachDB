@@ -2,24 +2,22 @@ package com.jphaugla.service.impl;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import com.jphaugla.domain.Account;
+
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jphaugla.domain.Customer;
 import com.jphaugla.domain.Email;
 import com.jphaugla.domain.Phone;
 import com.jphaugla.exception.NotFoundException;
-import com.jphaugla.repository.AccountRepository;
 import com.jphaugla.repository.CustomerRepository;
 
 import com.jphaugla.repository.EmailRepository;
 import com.jphaugla.repository.PhoneRepository;
 import com.jphaugla.service.CustomerService;
-import com.jphaugla.service.DataGeneratorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,15 +31,13 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
     @Autowired
-    private AccountRepository accountRepository;
-    @Autowired
     private EmailRepository emailRepository;
     @Autowired
     private PhoneRepository phoneRepository;
-    @Autowired
-    private DataGeneratorService dataGeneratorService;
     @Value("${app.region}")
-    private static String source_region;
+    private String source_region;
+    @Autowired
+    ObjectMapper objectMapper;
 
     public CustomerServiceImpl(CustomerRepository customerRepository) {
         super();
@@ -49,9 +45,12 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Customer saveCustomer(Customer customer) {
-        log.info("customerService.saveCustomer");
+    public Customer saveCustomer(Customer customer) throws JsonProcessingException {
+        log.info("customerService.saveCustomer with source_region: " + source_region);
         customer.setCurrentTime(source_region);
+        customer.set_source(source_region);
+        String jsonStr = objectMapper.writeValueAsString(customer);
+        log.info("customer is " + jsonStr);
         return customerRepository.save(customer);
     }
 

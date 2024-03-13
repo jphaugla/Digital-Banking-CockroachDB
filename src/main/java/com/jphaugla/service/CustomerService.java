@@ -1,6 +1,7 @@
 package com.jphaugla.service;
 
-import com.jphaugla.domain.Account;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import com.jphaugla.domain.Customer;
 import com.jphaugla.exception.NotFoundException;
 
@@ -10,7 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public interface CustomerService {
-    Customer saveCustomer(Customer customer);
+    Customer saveCustomer(Customer customer) throws JsonProcessingException;
     List<Customer> getAllCustomers();
     Customer getCustomerById(UUID id) throws NotFoundException;
     Customer updateCustomer(Customer customer, UUID id) throws NotFoundException;

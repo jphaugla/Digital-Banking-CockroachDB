@@ -1,6 +1,6 @@
 package com.jphaugla.controller;
 
-import java.text.ParseException;
+
 import java.util.List;
 
 import com.jphaugla.domain.Customer;
@@ -8,6 +8,8 @@ import com.jphaugla.domain.Email;
 import com.jphaugla.domain.Phone;
 import com.jphaugla.exception.InvalidUUIDException;
 import com.jphaugla.exception.NotFoundException;
+import java.text.ParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jphaugla.service.CustomerService;
 import com.jphaugla.service.EmailService;
 import com.jphaugla.service.PhoneService;
@@ -35,7 +37,7 @@ public class CustomerController {
 
 	// customer
 	@PutMapping("/save")
-	public ResponseEntity<Customer> saveCustomer() throws ParseException {
+	public ResponseEntity<Customer> saveCustomer() throws ParseException, JsonProcessingException {
 		log.info("in controller save customer");
 		Customer customer = customerService.saveSampleCustomer();
 		return ResponseEntity.ok(customer);
@@ -71,7 +73,7 @@ public class CustomerController {
 	}
 
 	@PostMapping(value = "/postCustomer", consumes = "application/json", produces = "application/json")
-	public  ResponseEntity<Customer> postCustomer(@RequestBody Customer customer ) throws ParseException {
+	public  ResponseEntity<Customer> postCustomer(@RequestBody Customer customer ) throws ParseException, JsonProcessingException {
 		Customer returnCustomer = customerService.saveCustomer(customer);
 		return  ResponseEntity.ok(returnCustomer);
 	}

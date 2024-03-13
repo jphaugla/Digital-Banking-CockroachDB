@@ -30,7 +30,7 @@ public class DisputeServiceImpl implements DisputeService {
     @Autowired
     private TransactionRepository transactionRepository;
     @Value("${app.region}")
-    private static String source_region;
+    private String source_region;
 
 
     public DisputeServiceImpl(DisputeRepository disputeRepository) {

@@ -15,10 +15,17 @@ information.  As seen below, this data is useful for a variety of business purpo
 - [Using Docker](#using-docker-for-non-application-components)
 - [Deploying java app locally](#deploying-java-app-on-mac)
 - [Using Terraform on Azure](#using-terraform-on-azure)
+  - [Deploy github](#deploy-github)
+  - [Start application](#start-application)
+  - [Test application](#test-application)
   - [Processing larger datasets](#process-larger-record-set)
 - [Investigate the APIs](#investigate-the-apis)
   - [Use SwaggerUI](#use-swagger-ui)
 - [Deploy to 2 regions](#deploy-to-2-regions-with-cdc-sink)
+  - [Run Terraform on each region](#run-terraform)
+  - [Verify Deployments](#verify-deployment)
+  - [Start application on each region](#start-application-in-each-region)
+  - [Deploy ChangeFeeds](#deploy-changefeeds)
 ## Overview
 In this github, a java spring boot application is run through a jar file to support typical API calls to a 
 CockroachDB banking data layer.  A CockroachDB docker configuration is included.
@@ -81,7 +88,7 @@ running on the local mac.
 * Prepare Docker environment-see the Prerequisites section above...
 * Pull this github into a directory
 ```bash
-git clone https://github.com/jphaugla/CockroachDBearch-Digital-Banking.git
+git clone https://github.com/jphaugla/Digital-Banking-CockroachDB.git
 ```
 * Refer to the notes for CockroachDB Docker images used but don't get too bogged down as docker compose handles everything except for a few admin steps on tomcat.
  * [CockroachDB stack docker instructions](https://CockroachDB.io/docs/stack/get-started/install/docker/)
@@ -119,24 +126,31 @@ cd transaction
 ```
 ## Using terraform on azure
 <a href="" rel="Deployment"><img src="images/deployment.png" alt="" /></a>
+### Deploy Github
 * Use [this github](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module)  to deploy all of the components (including the application)
+```bash
+git clone https://github.com/jphaugla/AZURE-Terraform-CRDB-Module
+```
 * Check the [readme](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/README.md) for the details on deploying this github including the cloning the github and working with Azure.  Completely deploy the terraform github for all deployments.  This will also deploy [this github](https://github.com/jphaugla/CockroachDBearch-Digital-Banking-CockroachDBTemplate) inside the app node.  The later application deployment instructions will be deployed within the app node using ssh
 * maven and java will be installed by the ansible jobs for the app node
-* cockraochdb cdc-sink can be used with this github for 2 DC cockroach deployments
+* CockroachDB cdc-sink can be used with this github for 2 DC cockroach deployments
+  * see instructions for [2 region here](#deploy-to-2-regions-with-cdc-sink)
 * the ip information is shared in a subdirectory for the region under [temp directory](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/provisioners/temp) 
 within the terraform/ansible repository.  Go to the files here to see private (internal) and public (external) kafka node and test node IP addresses.  The CockroachDB internal and external database connection dns names are also available.  These dns names will also give an internal and external CockroachDB enterprise node IP.
+### Start application
 * log into the app node using the app node IP and the ssh key defined in test/main.tf and go to github home
 ```bash
-ssh -i <azure key> adminuser@<appIP>
+cd AZURE-Terraform-CRDB-Module/provisioners/temp/<region name>
+ssh -i path_to_ssh_file adminuser@`cat app_external_ip.txt`
 cd Digital-Banking-CockroachDB
 ```
-
 * edit the [environment file](scripts/setEnv.sh)  using only the internal connection addresses.  NOTE: kafka will only connect from local azure IP addresses and not any public IP addresses.  Using public and private Kafka addresses is possible but not configured currently
 * These steps can all be done from client machine local browser using the kafka node public IP address and port 9021.  [http://172.172.133.201:9021/](http://172.172.133.201:9021/) From this home screen, pause the currently running connectors:  datagen-transactions and cockroach-sink-json using the Kafka Control Center.   This will just remove the noise of a second application running.  
 * Also drop the cockroachDB transaction table
 ```bash
 # connect to the app node
-ssh -i ~/.ssh/<sshkey> adminuser@<appnode public ip>
+cd AZURE-Terraform-CRDB-Module/provisioners/temp/<region name>
+ssh -i path_to_ssh_file adminuser@`cat app_external_ip.txt`
 # connect to cockroach using private address for the haproxy 
 cockroach-sql --host=192.168.3.102 --certs-dir=certs --user jhaugland
 >drop table transaction;
@@ -144,13 +158,15 @@ cockroach-sql --host=192.168.3.102 --certs-dir=certs --user jhaugland
 * CockroachDB tables will be created automatically by Spring Data JPA
 * start the application after logging in to the appnode
 ```bash
-ssh -i ~/.ssh/<sshkey> adminuser@<appnode public ip>
+cd AZURE-Terraform-CRDB-Module/provisioners/temp/<region name>
+ssh -i path_to_ssh_file adminuser@`cat app_external_ip.txt`
 cd Digital-Banking-CockroachDB
 mvn clean package
 # edit scripts/setEnv.sh for current nodes - CockroachDB_HOST, CockroachDB_PORT, and KAFKA_HOST must all change to match current environment.  *IMPORTANT* only use private/internal IP addresses-DO NOT USE *localhost*.  Additional note, CockroachDB password is different in local docker version and in ansible created version-verify CockroachDB password!
 source scripts/setEnv.sh
 java -jar target/cockroachDB-0.0.1-SNAPSHOT.jar
 ```
+### Test application
 * get a second terminal window to the app node and write a test message to kafka-this will cause the topic to be created.  Name can be changed in [application.properties](src/main/resources/application.properites) but default topic name is *transactions*
 ```bash
 ssh -i ~/.ssh/<sshkey> adminuser@<appnode public ip>
@@ -237,10 +253,12 @@ scripts are in ./scripts.  Adding the CockroachDB search queries behind each scr
   * disputeResolved.sh - charge back the dispute
 
 ## Deploy to 2 regions with cdc-sink
+### Prepare
 * Use the terraform/ansible deployment using the subdirectories [region1](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/region1) and [region2](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/region2) in the deployment github
 * Can disable deployment of Kafka by setting the *include_ha_proxy* flag to "no" in [deploy main.tf](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/region1/main.tf)
 * Ensure *install_cdc_sink* flag and *create_cdc_sink* flag are set to true in [main.yml](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/provisioners/roles/app-node/vars/main.yml)
 * Ensure *install_enterprise_keys* is set in both [region1](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/region1) and [region2](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/region2)
+### Run Terraform
 * Run terraform apply in each region directory
 ```bash
 export TF_VAR_cluster_organization={CLUSTER ORG}
@@ -253,9 +271,19 @@ cd AZURE-Terraform-CRDB-Module/region2
 terraform init
 terraform apply
 ```
-* This will deploy this Digital-Banking-CockroachDB github into the application node with connectivity to cockroachDB.  Additionally, cdc-sink is deployed and running on the application node also with connectivity to haproxy and cockroachDB in the same region
-* The necessary manual step is to deploy a [CockroachDB Changefeed](https://www.cockroachlabs.com/docs/stable/create-changefeed) across the regions to make active/active cdc-sink between the two otherwise independent regions
-  * Port 30004 is open on both regions to allow the changefeed to communicate with the application server on the other region
+### Verify deployment
+* This will deploy this Digital-Banking-CockroachDB github into the application node with connectivity to cockroachDB.  
+Additionally, cdc-sink is deployed and running on the application node also with connectivity to haproxy and cockroachDB in the same region
+  * Ensure cdc-sink is running on each of the region application nodes 
+```bash
+cd ~/AZURE-Terraform-CRDB-Module/provisioners/temp/{region_name}
+ssh -i path_to_ssh_file adminuser@`cat app_external_ip.txt`
+ps -ef |grep cdc-sink
+# if it is not running, start it
+cd /opt/cdc-sink-linux-amd64-master
+./start.sh
+```
+### Start application in each region
 * The java application needs to be started manually on the application node for each region.  Set up the [environment file](scripts/setEnv.sh)
   * the ip addresses can be found in a subdirectory under [temp](provisioners/temp) for each deployed region
   * Make sure to set the COCKROACH_HOST environment variable to the private IP address for the haproxy node
@@ -264,16 +292,35 @@ terraform apply
   * Uncomment the COCKROACH_DB_PASS line to provide a password for the connection
   * If using kafka, KAFKA_HOST should be set to the internal IP address for kafka
   * set the REGION to the correct region
+* do on each region
+```bash
+cd ~/AZURE-Terraform-CRDB-Module/provisioners/temp/{region_name}
+ssh -i path_to_ssh_file adminuser@`cat app_external_ip.txt`
+cd Digital-Banking-CockroachDB
+# edit scripts/setEnv.sh as documented above
+source scripts/setEnv.sh
+mvn clean package
+java -jar target/cockroach-0.0.1-SNAPSHOT.jar
+```
+### Deploy changefeeds
+* The necessary manual step is to deploy a [CockroachDB Changefeed](https://www.cockroachlabs.com/docs/stable/create-changefeed) across the regions to make active/active cdc-sink between the two otherwise independent regions
+  * Port 30004 is open on both regions to allow the changefeed to communicate with the application server on the other region
 * Start the changefeed on each side with changfeed pointing to the other sids's application external IP address
 * The changefeed script is written on each of the cockroach database nodes by the terraform script.  Login to any of the cockroach
 nodes using the IP address in [temp](provisioners/temp) for each deployed region.  
   * As previously mentioned, the changefeed script must be modified to point to the application external IP address for the other region
   * this is the step that reaches across to the other region as everything else is within region boundaries
+* IMPORTANT NOTE:  Must have enterprise license for the changefeed to be enabled
+  * see [changefeed documentation](https://www.cockroachlabs.com/docs/stable/licensing-faqs#set-a-license)
 ```bash
 cd ~/AZURE-Terraform-CRDB-Module/provisioners/temp/{region_name}
 ssh -i path_to_ssh_file adminuser@`cat crdb_external_ip{any ip_address}`
 # edit create-changefeed.sh putting the app node external IP address for the other region
+cockroach sql --host=localhost --certs-dir=certs
+SET CLUSTER SETTING cluster.organization = 'Acme Company';
+SET CLUSTER SETTING enterprise.license = 'xxxxxxxxxxxx';
+exit
 vi changefeed.sh
 ./changefeed.sh
 ```
-Verify rows are flowing across from either region
+Verify rows are flowing across from either region by running the [test application steps](#test-application) 

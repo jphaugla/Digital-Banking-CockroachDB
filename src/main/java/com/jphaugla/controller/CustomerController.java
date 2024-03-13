@@ -35,10 +35,10 @@ public class CustomerController {
 
 	// customer
 	@PutMapping("/save")
-	public ResponseEntity<String> saveCustomer() throws ParseException {
+	public ResponseEntity<Customer> saveCustomer() throws ParseException {
 		log.info("in controller save customer");
 		Customer customer = customerService.saveSampleCustomer();
-		return ResponseEntity.ok(customer.getId().toString());
+		return ResponseEntity.ok(customer);
 	}
 	@GetMapping("/email")
 	public ResponseEntity<Customer> getCustomerByEmail(@RequestParam String email_string)
@@ -71,9 +71,9 @@ public class CustomerController {
 	}
 
 	@PostMapping(value = "/postCustomer", consumes = "application/json", produces = "application/json")
-	public  ResponseEntity<String> postCustomer(@RequestBody Customer customer ) throws ParseException {
-		customerService.saveCustomer(customer);
-		return  ResponseEntity.ok(customer.getId().toString());
+	public  ResponseEntity<Customer> postCustomer(@RequestBody Customer customer ) throws ParseException {
+		Customer returnCustomer = customerService.saveCustomer(customer);
+		return  ResponseEntity.ok(returnCustomer);
 	}
 
 	@GetMapping("/getStateCity")

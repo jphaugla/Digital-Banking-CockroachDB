@@ -98,20 +98,20 @@ public class CustomerServiceImpl implements CustomerService {
     }
     @Override
     public Customer saveSampleCustomer() throws ParseException {
-        log.info("starting saveSampleCustoemr");
-        Date create_date = new SimpleDateFormat("yyyy-MM-dd").parse("2020-03-28");
-        Timestamp create_timestamp = new Timestamp((create_date.getTime()));
-        Date last_update = new SimpleDateFormat("yyyy-MM-dd").parse("2020-03-29");
-        Timestamp last_update_timestamp = new Timestamp((last_update.getTime()));
+        log.info("starting saveSampleCustomer");
+        long currentMillis = System.currentTimeMillis();
+        Timestamp timestamp_current = new Timestamp(currentMillis);
 
         Customer customer = new Customer("4744 17th av s", "",
                 "Home", "N", "Minneapolis", "00",
-                "jph", create_timestamp, "IDR",
+                "jph", timestamp_current, "IDR",
                 "A", "BANK", "1949.01.23",
                 "Ralph", "Ralph Waldo Emerson", "M", "Emerson",
-                last_update_timestamp, "jph", "Waldo", "MR",
+                timestamp_current, "jph", "Waldo", "MR",
                 "help", "MN", "55444", "55444-3322"
         );
+        customer.set_source(source_region);
+        customer.set_timestamp(timestamp_current);
         log.info("Customer Saved");
         customerRepository.save(customer);
         UUID cust = customer.getId();

@@ -284,6 +284,7 @@ cd /opt/cdc-sink-linux-amd64-master
 ./start.sh
 ```
 ### Start application in each region
+*  NOTE:  this compiling and starting of the application step has been automated in terraform so only for debug/understanding
 * The java application needs to be started manually on the application node for each region.  Set up the [environment file](scripts/setEnv.sh)
   * the ip addresses can be found in a subdirectory under [temp](provisioners/temp) for each deployed region
   * Make sure to set the COCKROACH_HOST environment variable to the private IP address for the haproxy node

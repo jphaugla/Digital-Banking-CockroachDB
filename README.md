@@ -138,6 +138,7 @@ git clone https://github.com/jphaugla/AZURE-Terraform-CRDB-Module
 * the ip information is shared in a subdirectory for the region under [temp directory](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/provisioners/temp) 
 within the terraform/ansible repository.  Go to the files here to see private (internal) and public (external) kafka node and test node IP addresses.  The CockroachDB internal and external database connection dns names are also available.  These dns names will also give an internal and external CockroachDB enterprise node IP.
 ### Start application
+*  NOTE:  this compiling and starting of the application step has been automated in terraform so only for debug/understanding
 * log into the app node using the app node IP and the ssh key defined in test/main.tf and go to github home
 ```bash
 cd AZURE-Terraform-CRDB-Module/provisioners/temp/<region name>

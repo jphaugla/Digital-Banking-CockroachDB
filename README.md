@@ -138,7 +138,8 @@ git clone https://github.com/jphaugla/AZURE-Terraform-CRDB-Module
 * the ip information is shared in a subdirectory for the region under [temp directory](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/provisioners/temp) 
 within the terraform/ansible repository.  Go to the files here to see private (internal) and public (external) kafka node and test node IP addresses.  The CockroachDB internal and external database connection dns names are also available.  These dns names will also give an internal and external CockroachDB enterprise node IP.
 ### Start application
-*  NOTE:  this compiling and starting of the application step has been automated in terraform so only for debug/understanding
+*  *NOTE:*  this compiling and starting of the application step has been automated in terraform so only for debug/understanding
+  * Can skip forward to [Test application](#test-application)
 * log into the app node using the app node IP and the ssh key defined in test/main.tf and go to github home
 ```bash
 cd AZURE-Terraform-CRDB-Module/provisioners/temp/<region name>
@@ -170,7 +171,8 @@ java -jar target/cockroachDB-0.0.1-SNAPSHOT.jar
 ### Test application
 * get a second terminal window to the app node and write a test message to kafka-this will cause the topic to be created.  Name can be changed in [application.properties](src/main/resources/application.properites) but default topic name is *transactions*
 ```bash
-ssh -i ~/.ssh/<sshkey> adminuser@<appnode public ip>
+cd AZURE-Terraform-CRDB-Module/provisioners/temp/<region name>
+ssh -i path_to_ssh_file adminuser@`cat app_external_ip.txt`
 cd Digital-Banking-CockroachDB/scripts/transaction
 # make sure saveTransaction script says doKafka=true
 ./saveTransaction.sh
@@ -180,6 +182,7 @@ cd Digital-Banking-CockroachDB/scripts/transaction
   * if you run saveTransaction.sh again while looking at the control center topic pane, the message will be visible.  If you put offset of 0, both messages will be visible.
   * application will create the kafka topic on first usage of the topic.  
 * Call kafka API to create the CockroachDBSink using provided script.  DO THIS FROM your local Mac
+* *NOTE:*  This has been automated in the ansible script so just verify from Kafka that this *cockroach-sink-json-transform* sink is created
 ```bash
 cd Digital-Banking-CockroachDB/scripts
 #  change localhost to the external/public ip address for the kafka node in the last line. 

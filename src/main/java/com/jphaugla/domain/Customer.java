@@ -35,7 +35,7 @@ public class Customer extends BaseEntity{
     private  String fullName;
     private  String gender;
     private  String lastName;
-    private  Timestamp lastUpdated;
+    private  Timestamp _timestamp;
     private  String lastUpdatedBy;
     private  String middleName;
     private  String prefix;
@@ -48,7 +48,7 @@ public class Customer extends BaseEntity{
    public void setCurrentTime (String in_source) {
        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
        setCreatedDatetime(currentTimestamp);
-       setLastUpdated(currentTimestamp);
+       set_timestamp(currentTimestamp);
        set_source(in_source);
        if (getId() == null) {
            generateSetID();

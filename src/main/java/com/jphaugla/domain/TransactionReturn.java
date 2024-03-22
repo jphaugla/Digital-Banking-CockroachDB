@@ -16,7 +16,7 @@ public class TransactionReturn  {
     @Id
     private String reasonCode;
     private String reasonDescription;
-    private Timestamp lastUpdated;
+    private Timestamp _timestamp;
     @Value("${app.region}")
     private String _source;
 
@@ -28,7 +28,7 @@ public class TransactionReturn  {
 
     public void setCurrentTime(String in_source) {
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
-        setLastUpdated(currentTimestamp);
+        set_timestamp(currentTimestamp);
         set_source(in_source);
     }
 

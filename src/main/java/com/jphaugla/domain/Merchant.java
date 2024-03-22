@@ -21,7 +21,7 @@ public class Merchant  {
     private String categoryDescription;
     private String state;
     private String countryCode;
-    private Timestamp lastUpdated;
+    private Timestamp _timestamp;
     private String _source;
 
     public Merchant(String issuer, String in_cat_code, String in_cat_desc, String in_state, String in_country, String in_source) {
@@ -35,7 +35,7 @@ public class Merchant  {
 
     public void setCurrentTime(String in_source) {
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
-        setLastUpdated(currentTimestamp);
+        set_timestamp(currentTimestamp);
         set_source(in_source);
     }
 

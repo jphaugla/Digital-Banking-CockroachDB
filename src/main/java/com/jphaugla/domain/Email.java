@@ -21,7 +21,7 @@ public class Email  {
         private String address;
         private String label;
         private UUID customerId;
-        private Timestamp lastUpdated;
+        private Timestamp _timestamp;
         private String _source;
 
         public Email(String in_address, String in_label, UUID cust, String in_source) {
@@ -34,6 +34,6 @@ public class Email  {
         public void setCurrentTime(String in_source) {
                 Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
                 _source = in_source;
-                setLastUpdated(currentTimestamp);
+                set_timestamp(currentTimestamp);
         }
 }

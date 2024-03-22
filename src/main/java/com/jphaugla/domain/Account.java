@@ -22,7 +22,7 @@ public class Account extends BaseEntity{
     private String accountStatus;
     private String cardNum;
     private Timestamp openDatetime;
-    private Timestamp lastUpdated;
+    private Timestamp _timestamp;
     private String lastUpdatedBy;
     private String createdBy;
     private Timestamp createdDatetime;
@@ -31,7 +31,7 @@ public class Account extends BaseEntity{
         set_source(region);
         setCreatedDatetime(currentTimestamp);
         setOpenDatetime(currentTimestamp);
-        setLastUpdated(currentTimestamp);
+        set_timestamp(currentTimestamp);
         if (getId() == null) {
             generateSetID();
         }

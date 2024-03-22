@@ -49,7 +49,6 @@ public class Customer extends BaseEntity{
        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
        setCreatedDatetime(currentTimestamp);
        setLastUpdated(currentTimestamp);
-       set_timestamp(currentTimestamp);
        set_source(in_source);
        if (getId() == null) {
            generateSetID();

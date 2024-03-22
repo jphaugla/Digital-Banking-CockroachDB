@@ -29,7 +29,6 @@ public class Dispute extends BaseEntity{
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
         setFilingDate(currentTimestamp);
         setLastUpdateDate(currentTimestamp);
-        set_timestamp(currentTimestamp);
         set_source(in_source);
         if (getId() == null) {
             generateSetID();
@@ -38,7 +37,6 @@ public class Dispute extends BaseEntity{
     public void setChargeBackReason(String chargeBackReason) {
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
         lastUpdateDate = currentTimestamp;
-        set_timestamp(currentTimestamp);
         reasonCode=chargeBackReason;
         reviewDate=currentTimestamp;
         status="Investigate";
@@ -47,14 +45,12 @@ public class Dispute extends BaseEntity{
     public void acceptChargeBack() {
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
         lastUpdateDate=currentTimestamp;
-        set_timestamp(currentTimestamp);
         acceptanceChargeBackDate=currentTimestamp;
         status="ChargedBack";
     }
     public void resolved() {
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
         lastUpdateDate=currentTimestamp;
-        set_timestamp(currentTimestamp);
         resolutionDate=currentTimestamp;
         status="Resolved";
     }

@@ -222,7 +222,7 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
         transaction.setAccountId(account.getId());
         String transactionStat = transactionStatus[randomLocation];
         transaction.setStatus(transactionStat);
-        transaction.set_timestamp(timestamp_current);
+        transaction.setLastUpdated(timestamp_current);
         if(Objects.equals(transactionStat, "POSTED")) {
             Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
 

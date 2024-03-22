@@ -32,7 +32,6 @@ public class Account extends BaseEntity{
         setCreatedDatetime(currentTimestamp);
         setOpenDatetime(currentTimestamp);
         setLastUpdated(currentTimestamp);
-        set_timestamp(currentTimestamp);
         if (getId() == null) {
             generateSetID();
         }

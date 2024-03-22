@@ -137,15 +137,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public UUID saveSampleTransaction(UUID accountId, Boolean doKafka) throws ParseException, JsonProcessingException {
-        Date settle_date = new SimpleDateFormat("yyyy/MM/dd").
-                parse("2021/07/28");
-        Timestamp settle_timestamp = new Timestamp((settle_date.getTime()));
 
-        Date post_date = new SimpleDateFormat("yyyy/MM/dd").parse("2021/07/28");
-        Timestamp post_timestamp = new Timestamp((post_date.getTime()));
-
-        Date init_date = new SimpleDateFormat("yyyy/MM/dd").parse("2021/07/27");
-        Timestamp init_timestamp = new Timestamp((init_date.getTime()));
+        Long currentMillis = System.currentTimeMillis();
+        Timestamp timestamp_current = new Timestamp(currentMillis);
         Merchant merchant = new Merchant("Cub Foods", "5411",
                 "Grocery Stores", "MN", "US", source_region);
         log.info("before save merchant");
@@ -155,8 +149,8 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = new Transaction(accountId,
                 "Debit", merchant.getName() + ":" + "acct01", "referenceKeyType",
                 "referenceKeyValue", 323.23, 323.22, "1631",
-                "Test Transaction", null, null,
-                null, "POSTED", null, null, "ATM665", null);
+                "Test Transaction", timestamp_current, timestamp_current, timestamp_current,
+                timestamp_current, "POSTED", null, null, "ATM665", null);
         log.info("before save transaction");
         if (doKafka) {
             try {

@@ -39,6 +39,8 @@ public class Transaction extends BaseEntity{
     private Timestamp settlementDate;
     @JsonFormat(shape=JsonFormat.Shape.NUMBER_INT)
     private Timestamp postingDate;
+    @JsonFormat(shape=JsonFormat.Shape.NUMBER_INT)
+    private Timestamp lastUpdated;
     //  this is authorized, posted, settled
     private String status;
     @JsonFormat(shape=JsonFormat.Shape.STRING)
@@ -54,7 +56,7 @@ public class Transaction extends BaseEntity{
     private List<String> transactionTags;
     public void setCurrentTime (String in_source) {
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
-        set_timestamp(currentTimestamp);
+        setLastUpdated(currentTimestamp);
         set_source(in_source);
         if (getId() == null) {
             generateSetID();

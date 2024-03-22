@@ -20,7 +20,7 @@ public class Phone  {
         private String number;
         private String label;
         private UUID customerId;
-        private Timestamp _timestamp;
+        private Timestamp lastUpdated;
         @Value("${app.region}")
         private String _source;
 
@@ -33,7 +33,7 @@ public class Phone  {
 
         public void setCurrentTime(String in_source) {
                 Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
-                set_timestamp(currentTimestamp);
+                setLastUpdated(currentTimestamp);
                 set_source(in_source);
         }
 

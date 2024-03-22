@@ -110,7 +110,6 @@ public class CustomerServiceImpl implements CustomerService {
                 "help", "MN", "55444", "55444-3322"
         );
         customer.set_source(source_region);
-        customer.set_timestamp(timestamp_current);
         log.info("Customer Saved");
         customerRepository.save(customer);
         UUID cust = customer.getId();

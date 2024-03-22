@@ -20,6 +20,7 @@ public abstract class BaseEntity {
     @Id
     @JsonFormat(shape=JsonFormat.Shape.STRING)
     private UUID id;
+    @JsonFormat(shape=JsonFormat.Shape.NUMBER_INT)
     private Timestamp _timestamp;
     private String _source;
     public UUID generateSetID() {

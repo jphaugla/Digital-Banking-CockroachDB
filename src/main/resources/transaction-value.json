@@ -10,6 +10,20 @@
         "type": "string",
         "optional": true,
         "default": null,
+        "field": "_source"
+      },
+      {
+        "type": "int64",
+        "optional": true,
+        "default": null,
+        "name": "org.apache.kafka.connect.data.Timestamp",
+        "logicalType": "timestamp-millis",
+        "field": "_timestamp"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "default": null,
         "field": "accountId"
       },
       {

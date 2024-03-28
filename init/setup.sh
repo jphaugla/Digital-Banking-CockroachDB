@@ -16,6 +16,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
+echo "sleep a few seconds"
+sleep 3
 echo "cockroach init"
 cockroach init --insecure --host=crdb1:26257
 echo "add jhaugland with admin permissions"

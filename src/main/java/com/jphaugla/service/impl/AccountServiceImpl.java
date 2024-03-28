@@ -97,7 +97,8 @@ public class AccountServiceImpl implements AccountService {
         Account account = new Account("testAccount", customerId,
                 "credit", "teller", "active",
                 "ccnumber666655", open_timestamp,
-                null, null, "jason", create_timestamp);
+                null, "jason", "jason", create_timestamp);
+        account.setCurrentTime(source_region);
         accountRepository.save(account);
         return account;
     }

@@ -1,2 +1,2 @@
 # get one transaction by ID  
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8080/api/transaction/getTags?transactionId=0000342e-cf94-4a8d-868f-c22b7597b465'
+curl -X GET -H "Content-Type: application/json"  'http://localhost:8080/api/transaction/getTags?transactionId=ffde473d-4cc9-45f8-bf79-2b865901ad7f'

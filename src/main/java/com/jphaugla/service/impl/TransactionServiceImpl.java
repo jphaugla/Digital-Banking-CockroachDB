@@ -130,9 +130,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public void deleteTransaction(UUID id) throws NotFoundException {
-        transactionRepository.findById(id).orElseThrow(() ->
-                new NotFoundException(String.format(ERR_TRANSACTION_NOT_FOUND, id)));
+    public void deleteTransaction(UUID transaction) throws NotFoundException {
+        transactionRepository.deleteById(transaction);
     }
 
     @Override

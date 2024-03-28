@@ -2,4 +2,4 @@
 # get by email only
 #  for error handle testing
 # curl -X GET -H "Content-Type: application/json"  'http://localhost:8080/api/email/getEmail?email=jasonhaugland@'
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8080/api/email/getEmail?email=jasonhaugland@gmail.com'
+curl -X GET -H "Content-Type: application/json"  'http://localhost:8080/api/email/getEmail?email=Simon.Von@gmail.com'

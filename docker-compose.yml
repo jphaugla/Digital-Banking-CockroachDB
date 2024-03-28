@@ -8,7 +8,24 @@ services:
      - "26257:26257"
      - "18080:8080"
    command: start-single-node --insecure --store=cockroach-data/crdb1 
+   restart: always
+   healthcheck:
+      test: curl http://localhost:8080/health
+      interval: 2s
+      retries: 20
    volumes:
      - "${PWD}/cockroach-data/crdb1:/cockroach/cockroach-data"
      - "${PWD}/scripts:/scripts"
 
+ add_password:
+   hostname: add_password
+   build: ./init
+   environment:
+      - COCKROACH_DB_USER=${COCKROACH_DB_USER}
+   healthcheck:
+     test: bash -c '[ -f /tmp/done.txt ] '
+     interval: 2s
+     retries: 10
+   depends_on:
+     crdb1:
+       condition: service_healthy

@@ -93,37 +93,61 @@ git clone https://github.com/jphaugla/Digital-Banking-CockroachDB.git
 * Refer to the notes for CockroachDB Docker images used but don't get too bogged down as docker compose handles everything except for a few admin steps on tomcat.
  * [CockroachDB stack docker instructions](https://CockroachDB.io/docs/stack/get-started/install/docker/)
 * Open terminal and change to the github home where you will see the docker-compose.yml file and bring up docker
-* Add the jhaugland user name and give it full permissions
+* Instead of the single node cockroachDB in docker-compose.yml, a 3 node cockroachDB with haproxy in 
+[docker-compose-3-crdb.yml](docker-compose-3-crdb.yml) can be used
 ```bash
 docker-compose -f docker-compose-kafka.yml -f docker-compose.yml up -d
+```
+* *NOTE-the addition of the username has been added to the docker-compose and is no longer needed*
+*  *SKIP* Add the jhaugland user name and give it full permissions
+```bash
 cockroach sql --insecure 
 > create user jhaugland;
 > grant all on database defaultdb to jhaugland;
 ```
 ## Deploying java app on mac
+### Start Java app
 * ensure maven and java are deployed on the local machine
   * have been running with java 17 or java 18 but other versions should work as well
   * have been running with maven 14.2.1
 * Set up the environment and run the java application locally
   * edit the [environment file](scripts/setEnv.sh) to use localhost for non-application components
   * source this environment file
-  * run the application.  Note it will fail because jhaugland username is not 
+  * run the application. 
 ```bash
 source  scripts/setEnv.sh
 mvn clean package
 java -jar target/cockroach-0.0.1-SNAPSHOT.jar
 ```
-Add the jdbc sink to get data into cockroachDB from kafka
+### Create JDBC sink
+* Add the jdbc sink to get data into cockroachDB from kafka
+* * This is the shell script [createCockroachTransform.sh](scripts/createCockroachTransform.sh)
 ```bash
 cd Digital-Banking-CockroachDB/scripts
-#  change localhost to the external/public ip address for the kafka node in the last line. 
-#  Make sure this is the public kafka IP and not the private  
-#  Verify the CockroachDB.uri and CockroachDB.password.  (the CockroachDB.uri must be INTERNAL haproxy IP)
 ./createCockroachTransform.sh
-ssh -i ~/.ssh/<sshkey> CockroachDBlabs@<appnode public ip>
-cd transaction
+```
+* ensure the parameter *dokafka* in [saveTransaction.sh](scripts/transaction/saveTransaction.sh) is set to true if using kafka
+```bash
+cd scripts/transaction
 ./saveTransaction.sh
 ```
+### Verify Kafka
+* check kafka control center to ensure data is flowing in going to [localhost:9021/](http://localhost:9021/)
+Will see ![](images/kafka-control-center.png)
+* click anywhere on the large *controlcenter.cluster* rectangle
+Will see ![](images/kafka-control-center-overview.png)
+* in the leftmost tab, click on the *Connect* button
+* in the main tabular, click on *connect-default* to see the cockroach-sink-json-transform is running
+![](images/kafka-sink.png)
+### Verify data in CockroachDB
+* should see one row in the transaction table
+```bash
+docker exec -it crdb1 bash
+cockroach sql --insecure
+select * from transaction
+```
+Continue testing with [Processing Larger Record set](#process-larger-record-set)
+
 ## Using terraform on azure
 <a href="" rel="Deployment"><img src="images/deployment.png" alt="" /></a>
 ### Deploy Github
@@ -216,8 +240,7 @@ verify generateData.sh says doKafkfa=true
 ```bash
 ./scripts/generateData.sh
 ```
-Will see large number of records now in CockroachDB
-
+* Will see large number of records now in CockroachDB
 
 ### Investigate the APIs
 #### Use swagger UI

@@ -8,6 +8,11 @@ services:
      - "26257:26257"
      - "18080:18080"
    command: start --insecure --store=node1 --listen-addr=crdb1:26257 --http-addr=crdb1:18080 --join=crdb1:26257,crdb2:26258,crdb3:26259
+   restart: always
+   healthcheck:
+      test: curl http://localhost:8080/health
+      interval: 2s
+      retries: 20
    volumes:
      - "${PWD}/cockroach-data/crdb1:/cockroach/cockroach-data"
      - "${PWD}/scripts:/scripts"
@@ -48,3 +53,15 @@ services:
    volumes:
      - "${PWD}/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg"
 
+ add_password:
+   hostname: add_password
+   build: ./init
+   environment:
+      - COCKROACH_DB_USER=${COCKROACH_DB_USER}
+   healthcheck:
+     test: bash -c '[ -f /tmp/done.txt ] '
+     interval: 2s
+     retries: 10
+   depends_on:
+     crdb1:
+       condition: service_healthy

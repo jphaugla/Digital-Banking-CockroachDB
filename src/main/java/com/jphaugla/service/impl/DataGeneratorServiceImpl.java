@@ -195,14 +195,18 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
     public Transaction createRandomTransaction(int noOfDays, Integer idx, Account account,
                                                String key_suffix, List<Merchant> merchants,
                                                List<TransactionReturn> transactionReturns) {
+        // locations has 10 locations so, this is 1-10
         double v = Math.random() * locations.size();
+        // locations has 10 locations so, this is 1-10
         int intValue = (int) v;
         String location = locations.get(intValue);
         v = Math.ceil(Math.random() * 3);
+        //  this is 1-3
         int noOfItems = (int) v;
         v = Math.random() * issuers.length;
+        // issuers.length is 25 so is 1-25
         int randomLocation = (int) v;
-
+        // log.info(" entering createRandomTransaction merchant list " + merchants.toString());
         Long currentMillis = System.currentTimeMillis();
         //  gets random time between current time and requested number of days ago
         Long millisRandom = Long.valueOf(usFaker.random().nextInt(0,noOfDays *DAY_MILLIS));
@@ -245,7 +249,9 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
         else{
             transaction.setAmountType("Credit");
         }
-        transaction.setMerchant(merchants.get(randomLocation).getName());
+        String merchantName = merchants.get(randomLocation).getName();
+        // log.info("Merchant: " + merchantName);
+        transaction.setMerchant(merchantName);
 
         transaction.setReferenceKeyType("reftype");
         transaction.setReferenceKeyValue("thisRef");

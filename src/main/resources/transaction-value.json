@@ -27,40 +27,28 @@
         "field": "accountId"
       },
       {
-        "type": "string",
-        "optional": true,
-        "default": null,
-        "field": "referenceKeyType"
-      },
-      {
-        "type": "string",
-        "optional": true,
-        "default": null,
-        "field": "referenceKeyValue"
-      },
-      {
         "type": "double",
         "optional": true,
         "default": null,
         "field": "amount"
       },
       {
-        "type": "double",
-        "optional": true,
-        "default": null,
-        "field": "originalAmount"
-      },
-      {
         "type": "string",
         "optional": true,
         "default": null,
-        "field": "tranCode"
+        "field": "amountType"
       },
       {
         "type": "string",
         "optional": true,
         "default": null,
         "field": "description"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "default": null,
+        "field": "disputeId"
       },
       {
         "type": "int64",
@@ -71,12 +59,22 @@
         "field": "initialDate"
       },
       {
-        "type": "int64",
+        "type": "string",
         "optional": true,
         "default": null,
-        "name": "org.apache.kafka.connect.data.Timestamp",
-        "logicalType": "timestamp-millis",
-        "field": "settlementDate"
+        "field": "location"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "default": null,
+        "field": "merchant"
+      },
+      {
+        "type": "double",
+        "optional": true,
+        "default": null,
+        "field": "originalAmount"
       },
       {
         "type": "int64",
@@ -90,25 +88,39 @@
         "type": "string",
         "optional": true,
         "default": null,
+        "field": "referenceKeyType"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "default": null,
+        "field": "referenceKeyValue"
+      },
+      {
+        "type": "int64",
+        "optional": true,
+        "default": null,
+        "name": "org.apache.kafka.connect.data.Timestamp",
+        "logicalType": "timestamp-millis",
+        "field": "settlementDate"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "default": null,
         "field": "status"
       },
       {
         "type": "string",
         "optional": true,
         "default": null,
-        "field": "disputeId"
+        "field": "tranCode"
       },
       {
         "type": "string",
         "optional": true,
         "default": null,
         "field": "transactionReturn"
-      },
-      {
-        "type": "string",
-        "optional": true,
-        "default": null,
-        "field": "location"
       }
     ],
     "optional": false,

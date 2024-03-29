@@ -347,12 +347,13 @@ nodes using the IP address in [temp](provisioners/temp) for each deployed region
 ```bash
 cd ~/AZURE-Terraform-CRDB-Module/provisioners/temp/{region_name}
 ssh -i path_to_ssh_file adminuser@`cat crdb_external_ip{any ip_address}`
-# edit create-changefeed.sh putting the app node external IP address for the other region
+# edit create-changefeed.sh putting the app node external IP address for the other region in the create changefeed statement 
+# where the webhook-https address is specified.  The host remains unchanged as localhost
 cockroach sql --host=localhost --certs-dir=certs
 SET CLUSTER SETTING cluster.organization = 'Acme Company';
 SET CLUSTER SETTING enterprise.license = 'xxxxxxxxxxxx';
 exit
-vi changefeed.sh
-./changefeed.sh
+vi create-changefeed.sh
+./creete-changefeed.sh
 ```
 Verify rows are flowing across from either region by running the [test application steps](#test-application) 

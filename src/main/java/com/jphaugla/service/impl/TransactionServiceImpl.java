@@ -99,10 +99,10 @@ public class TransactionServiceImpl implements TransactionService {
     }
     @Override
     public Transaction saveTransaction(Transaction transaction) throws JsonProcessingException {
-        log.info("transactionService.saveTransaction");
+        // log.info("transactionService.saveTransaction");
         transaction.setCurrentTime(source_region);
         String jsonStr = objectMapper.writeValueAsString(transaction);
-        log.info("object contents: " + jsonStr);
+        // log.info("object contents: " + jsonStr);
         return transactionRepository.save(transaction);
     }
     public void writeTransactionKafka(Transaction randomTransaction) throws JsonProcessingException {

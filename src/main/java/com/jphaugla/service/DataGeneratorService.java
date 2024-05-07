@@ -1,12 +1,8 @@
 package com.jphaugla.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jphaugla.domain.*;
-import com.jphaugla.exception.NotFoundException;
-import org.joda.time.DateTime;
-
 import java.util.List;
-import java.util.UUID;
+
 import java.util.concurrent.ExecutionException;
 
 public interface DataGeneratorService {

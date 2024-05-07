@@ -31,22 +31,7 @@
 		</dependency>
 		<dependency>
 			<groupId>io.confluent</groupId>
-			<artifactId>kafka-connect-avro-converter</artifactId>
-			<version>${version.confluent}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.confluent</groupId>
-			<artifactId>kafka-avro-serializer</artifactId>
-			<version>${version.confluent}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.confluent</groupId>
 			<artifactId>kafka-json-schema-serializer</artifactId>
-			<version>${version.confluent}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.confluent</groupId>
-			<artifactId>kafka-json-serializer</artifactId>
 			<version>${version.confluent}</version>
 		</dependency>
 		<dependency>
@@ -124,10 +109,10 @@
 			<name>Spring Milestones</name>
 			<url>https://repo.spring.io/milestone</url>
 		</repository>
-			<repository>
-				<id>confluent</id>
-				<url>https://packages.confluent.io/maven/</url>
-			</repository>
+		<repository>
+			<id>confluent</id>
+			<url>https://packages.confluent.io/maven/</url>
+		</repository>
 		<repository>
 			<id>spring-snapshots</id>
 			<name>Spring Snapshots</name>

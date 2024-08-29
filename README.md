@@ -249,7 +249,7 @@ verify generateData.sh says doKafkfa=true
 ### Investigate the APIs
 #### Use swagger UI
 The hostname here is for the public IP of the application node or it is localhost if running on docker
-* []http://localhost:8080/v3/api-docs(http://localhost:8080/v3/api-docs)
+* [http://localhost:8080/v3/api-docs}(http://localhost:8080/v3/api-docs)
 * [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
 #### run bash scripts 

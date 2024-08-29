@@ -248,8 +248,9 @@ verify generateData.sh says doKafkfa=true
 
 ### Investigate the APIs
 #### Use swagger UI
-* [open api docs](http://localhost:8080/v3/api-docs)
-* [use swagger ui](http://localhost:8080/swagger-ui/index.html)
+The hostname here is for the public IP of the application node or it is localhost if running on docker
+* []http://localhost:8080/v3/api-docs(http://localhost:8080/v3/api-docs)
+* [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
 #### run bash scripts 
 scripts are in ./scripts.  Adding the CockroachDB search queries behind each script here also...

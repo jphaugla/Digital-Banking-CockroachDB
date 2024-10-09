@@ -7,15 +7,15 @@ import jakarta.persistence.*;
 import java.sql.Timestamp;
 import java.util.UUID;
 
-@Entity
+// @Entity
 @Getter
 @Setter
 // Choose your inheritance strategy:
 //@Inheritance(strategy=InheritanceType.JOINED)
 //@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
-
-public abstract class BaseEntity {
+// @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
+@MappedSuperclass
+public class BaseEntity {
 
     @Id
     @JsonFormat(shape=JsonFormat.Shape.STRING)

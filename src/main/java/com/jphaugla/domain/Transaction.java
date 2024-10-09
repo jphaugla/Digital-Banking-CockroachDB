@@ -20,6 +20,7 @@ import java.util.UUID;
 @Setter
 
 @Entity
+@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 @Table(name = "transaction", schema = "public")
 public class Transaction extends BaseEntity{
     @JsonFormat(shape=JsonFormat.Shape.STRING)

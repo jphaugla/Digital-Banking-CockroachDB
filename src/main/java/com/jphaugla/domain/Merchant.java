@@ -13,6 +13,7 @@ import java.sql.Timestamp;
 @Setter
 
 @Entity
+@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 @Table(name = "merchant", schema = "public")
 public class Merchant  {
     @Id

@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 @Table(name = "transaction_return", schema = "public")
 public class TransactionReturn  {
     @Id

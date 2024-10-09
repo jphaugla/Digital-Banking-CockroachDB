@@ -1,10 +1,7 @@
 package com.jphaugla.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import java.sql.Timestamp;
 
@@ -18,6 +15,7 @@ import java.util.UUID;
 @Setter
 
 @Entity
+@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 @Table(name = "test", schema = "public")
 public class Test {
         @Id

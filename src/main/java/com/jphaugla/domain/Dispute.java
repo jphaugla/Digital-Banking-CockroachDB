@@ -14,6 +14,7 @@ import java.util.UUID;
 @Setter
 
 @Entity
+@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 @Table(name = "dispute", schema = "public")
 public class Dispute extends BaseEntity{
     private UUID tranId;

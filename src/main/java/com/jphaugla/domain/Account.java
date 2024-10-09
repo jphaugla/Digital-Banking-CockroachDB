@@ -13,6 +13,7 @@ import java.util.UUID;
 @Setter
 
 @Entity
+@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 @Table(name = "account", schema = "public")
 public class Account extends BaseEntity{
     private String accountNo;

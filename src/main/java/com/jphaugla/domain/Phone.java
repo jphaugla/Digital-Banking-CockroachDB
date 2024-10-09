@@ -14,6 +14,7 @@ import java.util.UUID;
 @Setter
 
 @Entity
+@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 @Table(name = "phone", schema = "public", indexes = @Index(columnList = "customerId"))
 public class Phone  {
         @Id

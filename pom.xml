@@ -16,7 +16,7 @@
 	<packaging>jar</packaging>
 	<properties>
 		<start-class>com.jphaugla.DemoApplication</start-class>
-		<version.confluent>7.5.3</version.confluent>
+		<version.confluent>7.7.1</version.confluent>
 	</properties>
 
 	<dependencies>

@@ -63,6 +63,7 @@ CockroachDB banking data layer.  A CockroachDB docker configuration is included.
  * [Spring Boot PostgreSQL CRUD github](https://github.com/RameshMF/spring-boot-tutorial-course/tree/main/springboot-backend)
  * [Cockroachlabs University sample movr application](https://university.cockroachlabs.com/courses/course-v1:crl+fundamentals-of-crdb-for-java-devs+self-paced/course/)
  * [Cockroachlabs Enterprise license key](https://www.cockroachlabs.com/docs/stable/licensing-faqs#set-a-license)
+ * [Hibernate inheritance stack overflow](https://stackoverflow.com/questions/26205820/hibernate-inheritance-table-per-class-and-single-table-mix)
 
 
 ## Technical Overview
@@ -172,7 +173,7 @@ within the terraform/ansible repository.  Go to the files here to see private (i
 ```bash
 cd AZURE-Terraform-CRDB-Module/provisioners/temp/<region name>
 ssh -i path_to_ssh_file adminuser@`cat app_external_ip.txt`
-cd Digital-Banking-CockroachDB
+cd /opt/Digital-Banking-CockroachDB
 ```
 * edit the [environment file](scripts/setEnv.sh)  using only the internal connection addresses.  NOTE: kafka will only connect from local azure IP addresses and not any public IP addresses.  Using public and private Kafka addresses is possible but not configured currently
 * These steps can all be done from client machine local browser using the kafka node public IP address and port 9021.  [http://172.172.133.201:9021/](http://172.172.133.201:9021/) From this home screen, pause the currently running connectors:  datagen-transactions and cockroach-sink-json using the Kafka Control Center.   This will just remove the noise of a second application running.  
@@ -190,7 +191,7 @@ cockroach-sql --host=192.168.3.102 --certs-dir=certs --user jhaugland
 ```bash
 cd AZURE-Terraform-CRDB-Module/provisioners/temp/<region name>
 ssh -i path_to_ssh_file adminuser@`cat app_external_ip.txt`
-cd Digital-Banking-CockroachDB
+cd /opt/Digital-Banking-CockroachDB
 mvn clean package
 # edit scripts/setEnv.sh for current nodes - CockroachDB_HOST, CockroachDB_PORT, and KAFKA_HOST must all change to match current environment.  *IMPORTANT* only use private/internal IP addresses-DO NOT USE *localhost*.  Additional note, CockroachDB password is different in local docker version and in ansible created version-verify CockroachDB password!
 source scripts/setEnv.sh
@@ -201,7 +202,7 @@ java -jar target/cockroachDB-0.0.1-SNAPSHOT.jar
 ```bash
 cd AZURE-Terraform-CRDB-Module/provisioners/temp/<region name>
 ssh -i path_to_ssh_file adminuser@`cat app_external_ip.txt`
-cd Digital-Banking-CockroachDB/scripts/transaction
+cd /opt/Digital-Banking-CockroachDB/scripts/transaction
 # make sure saveTransaction script says doKafka=true
 ./saveTransaction.sh
 ```
@@ -212,7 +213,7 @@ cd Digital-Banking-CockroachDB/scripts/transaction
 * Call kafka API to create the CockroachDBSink using provided script.  DO THIS FROM your local Mac
 * *NOTE:*  This has been automated in the ansible script so just verify from Kafka that this *cockroach-sink-json-transform* sink is created
 ```bash
-cd Digital-Banking-CockroachDB/scripts
+cd /opt/Digital-Banking-CockroachDB/scripts
 #  change localhost to the external/public ip address for the kafka node in the last line. 
 #  Make sure this is the public kafka IP and not the private  
 #  Verify the CockroachDB.uri and CockroachDB.password.  (the CockroachDB.uri must be INTERNAL haproxy IP)
@@ -329,7 +330,7 @@ cd /opt/cdc-sink-linux-amd64-master
 ```bash
 cd ~/AZURE-Terraform-CRDB-Module/provisioners/temp/{region_name}
 ssh -i path_to_ssh_file adminuser@`cat app_external_ip.txt`
-cd Digital-Banking-CockroachDB
+cd /opt/Digital-Banking-CockroachDB
 # edit scripts/setEnv.sh as documented above
 source scripts/setEnv.sh
 mvn clean package

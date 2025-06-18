@@ -45,7 +45,7 @@ CockroachDB banking data layer.  A CockroachDB docker configuration is included.
 ## Requirements
 * Docker installed on your local system, see [Docker Installation Instructions](https://docs.docker.com/engine/installation/).
 * Alternatively, can run CockroachDB Enterprise and set the CockroachDB host and port in the application.properties file
-  * [This terraform and ansible github](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module) can be used to deploy this application to AZURE
+  * [This terraform and ansible github](https://github.com/jphaugla/crdb-terraform-ansible) can be used to deploy this application to AZURE
 * When using Docker for Mac or Docker for Windows, the default resources allocated to the linux VM running docker are 2GB RAM and 2 CPU's. Make sure to adjust these resources to meet the resource requirements for the containers you will be running. More information can be found here on adjusting the resources allocated to docker.
 * NOTE:  seemed very difficult to change the swagger ui port from 8080 so left application and swagger ui port at 8080
   * this conflicts with typcial port 8080 configuration of CockroachDB http port of 8080-must change out port 8080 
@@ -156,22 +156,22 @@ Continue testing with [Processing Larger Record set](#process-larger-record-set)
 ## Using terraform on azure
 <a href="" rel="Deployment"><img src="images/deployment.png" alt="" /></a>
 ### Deploy Github
-* Use [this github](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module)  to deploy all of the components (including the application)
+* Use [this github](https://github.com/jphaugla/crdb-terraform-ansible)  to deploy all of the components (including the application)
 ```bash
-git clone https://github.com/jphaugla/AZURE-Terraform-CRDB-Module
+git clone https://github.com/jphaugla/crdb-terraform-ansible
 ```
-* Check the [readme](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/README.md) for the details on deploying this github including the cloning the github and working with Azure.  Completely deploy the terraform github for all deployments.  This will also deploy [this github](https://github.com/jphaugla/CockroachDBearch-Digital-Banking-CockroachDBTemplate) inside the app node.  The later application deployment instructions will be deployed within the app node using ssh
+* Check the [readme](https://github.com/jphaugla/crdb-terraform-ansible/README.md) for the details on deploying this github including the cloning the github and working with Azure.  Completely deploy the terraform github for all deployments.  This will also deploy [this github](https://github.com/jphaugla/CockroachDBearch-Digital-Banking-CockroachDBTemplate) inside the app node.  The later application deployment instructions will be deployed within the app node using ssh
 * maven and java will be installed by the ansible jobs for the app node
 * CockroachDB cdc-sink can be used with this github for 2 DC cockroach deployments
   * see instructions for [2 region here](#deploy-to-2-regions-with-cdc-sink)
-* the ip information is shared in a subdirectory for the region under [temp directory](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/provisioners/temp) 
+* the ip information is shared in a subdirectory for the region under [temp directory](https://github.com/jphaugla/crdb-terraform-ansible/provisioners/temp) 
 within the terraform/ansible repository.  Go to the files here to see private (internal) and public (external) kafka node and test node IP addresses.  The CockroachDB internal and external database connection dns names are also available.  These dns names will also give an internal and external CockroachDB enterprise node IP.
 ### Start application
 *  *NOTE:*  this compiling and starting of the application step has been automated in terraform so only for debug/understanding
   * Can skip forward to [Test application](#test-application)
 * log into the app node using the app node IP and the ssh key defined in test/main.tf and go to github home
 ```bash
-cd AZURE-Terraform-CRDB-Module/provisioners/temp/<region name>
+cd crdb-terraform-ansible/provisioners/temp/<region name>
 ssh -i path_to_ssh_file adminuser@`cat app_external_ip.txt`
 cd /opt/Digital-Banking-CockroachDB
 ```
@@ -180,7 +180,7 @@ cd /opt/Digital-Banking-CockroachDB
 * Also drop the cockroachDB transaction table
 ```bash
 # connect to the app node
-cd AZURE-Terraform-CRDB-Module/provisioners/temp/<region name>
+cd crdb-terraform-ansible/provisioners/temp/<region name>
 ssh -i path_to_ssh_file adminuser@`cat app_external_ip.txt`
 # connect to cockroach using private address for the haproxy 
 cockroach-sql --host=192.168.3.102 --certs-dir=certs --user jhaugland
@@ -189,7 +189,7 @@ cockroach-sql --host=192.168.3.102 --certs-dir=certs --user jhaugland
 * CockroachDB tables will be created automatically by Spring Data JPA
 * start the application after logging in to the appnode
 ```bash
-cd AZURE-Terraform-CRDB-Module/provisioners/temp/<region name>
+cd crdb-terraform-ansible/provisioners/temp/<region name>
 ssh -i path_to_ssh_file adminuser@`cat app_external_ip.txt`
 cd /opt/Digital-Banking-CockroachDB
 mvn clean package
@@ -200,7 +200,7 @@ java -jar target/cockroachDB-0.0.1-SNAPSHOT.jar
 ### Test application
 * get a second terminal window to the app node and write a test message to kafka-this will cause the topic to be created.  Name can be changed in [application.properties](src/main/resources/application.properites) but default topic name is *transactions*
 ```bash
-cd AZURE-Terraform-CRDB-Module/provisioners/temp/<region name>
+cd crdb-terraform-ansible/provisioners/temp/<region name>
 ssh -i path_to_ssh_file adminuser@`cat app_external_ip.txt`
 cd /opt/Digital-Banking-CockroachDB/scripts/transaction
 # make sure saveTransaction script says doKafka=true
@@ -287,20 +287,20 @@ scripts are in ./scripts.  Adding the CockroachDB search queries behind each scr
 
 ## Deploy to 2 regions with cdc-sink
 ### Prepare
-* Use the terraform/ansible deployment using the subdirectories [region1](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/region1) and [region2](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/region2) in the deployment github
-* Can disable deployment of Kafka by setting the *include_ha_proxy* flag to "no" in [deploy main.tf](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/region1/main.tf)
-* Ensure *install_cdc_sink* flag and *create_cdc_sink* flag are set to true in [main.yml](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/provisioners/roles/app-node/vars/main.yml)
-* Ensure *install_enterprise_keys* is set in both [region1](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/region1) and [region2](https://github.com/jphaugla/AZURE-Terraform-CRDB-Module/blob/main/region2)
+* Use the terraform/ansible deployment using the subdirectories [region1](https://github.com/jphaugla/crdb-terraform-ansible/blob/main/region1) and [region2](https://github.com/jphaugla/crdb-terraform-ansible/blob/main/region2) in the deployment github
+* Can disable deployment of Kafka by setting the *include_ha_proxy* flag to "no" in [deploy main.tf](https://github.com/jphaugla/crdb-terraform-ansible/blob/main/region1/main.tf)
+* Ensure *install_cdc_sink* flag and *create_cdc_sink* flag are set to true in [main.yml](https://github.com/jphaugla/crdb-terraform-ansible/blob/main/provisioners/roles/app-node/vars/main.yml)
+* Ensure *install_enterprise_keys* is set in both [region1](https://github.com/jphaugla/crdb-terraform-ansible/blob/main/region1) and [region2](https://github.com/jphaugla/crdb-terraform-ansible/blob/main/region2)
 ### Run Terraform
 * Run terraform apply in each region directory
 ```bash
 export TF_VAR_cluster_organization={CLUSTER ORG}
 export TF_VAR_enterprise_license={LICENSE}
-git clone https://github.com/nollenr/AZURE-Terraform-CRDB-Module.git
-cd AZURE-Terraform-CRDB-Module/region1
+git clone https://github.com/nollenr/crdb-terraform-ansible.git
+cd crdb-terraform-ansible/region1
 terraform init
 terraform apply
-cd AZURE-Terraform-CRDB-Module/region2
+cd crdb-terraform-ansible/region2
 terraform init
 terraform apply
 ```
@@ -309,7 +309,7 @@ terraform apply
 Additionally, cdc-sink is deployed and running on the application node also with connectivity to haproxy and cockroachDB in the same region
   * Ensure cdc-sink is running on each of the region application nodes 
 ```bash
-cd ~/AZURE-Terraform-CRDB-Module/provisioners/temp/{region_name}
+cd ~/crdb-terraform-ansible/provisioners/temp/{region_name}
 ssh -i path_to_ssh_file adminuser@`cat app_external_ip.txt`
 ps -ef |grep cdc-sink
 # if it is not running, start it
@@ -328,7 +328,7 @@ cd /opt/cdc-sink-linux-amd64-master
   * set the REGION to the correct region
 * do on each region
 ```bash
-cd ~/AZURE-Terraform-CRDB-Module/provisioners/temp/{region_name}
+cd ~/crdb-terraform-ansible/provisioners/temp/{region_name}
 ssh -i path_to_ssh_file adminuser@`cat app_external_ip.txt`
 cd /opt/Digital-Banking-CockroachDB
 # edit scripts/setEnv.sh as documented above
@@ -347,7 +347,7 @@ nodes using the IP address in [temp](provisioners/temp) for each deployed region
 * IMPORTANT NOTE:  Must have enterprise license for the changefeed to be enabled
   * see [changefeed documentation](https://www.cockroachlabs.com/docs/stable/licensing-faqs#set-a-license)
 ```bash
-cd ~/AZURE-Terraform-CRDB-Module/provisioners/temp/{region_name}
+cd ~/crdb-terraform-ansible/provisioners/temp/{region_name}
 ssh -i path_to_ssh_file adminuser@`cat crdb_external_ip{any ip_address}`
 # edit create-changefeed.sh putting the app node external IP address for the other region in the create changefeed statement 
 # where the webhook-https address is specified.  The host remains unchanged as localhost

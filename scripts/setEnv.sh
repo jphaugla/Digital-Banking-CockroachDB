@@ -7,6 +7,9 @@ export COCKROACH_URL="jdbc:postgresql://${COCKROACH_HOST}:${COCKROACH_PORT}/defa
 export COCKROACH_DB_USER=jhaugland
 # uncomment this line if running
 # export COCKROACH_DB_PASS=jasonrocks
+export SPRING_DATASOURCE_URL="${COCKROACH_URL}"
+export SPRING_DATASOURCE_USERNAME="${COCKROACH_DB_USER}"
+export SPRING_DATASOURCE_PASSWORD="${COCKROACH_DB_PASS}"
 export USE_SSL=false
 # substitute in actual KAFKA_HOST internal IP
 # this will not run using a public ip-use the private ip on app node.  Did not set up the advertised listeners in kafka to make this work
